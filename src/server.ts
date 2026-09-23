@@ -39,15 +39,13 @@ const main = async () => {
 			console.log("[Seed] Notice:", seedError.message);
 		}
 
-		// 4. Start HTTP Server only in standalone server mode (not inside Vercel serverless worker)
-		if (!process.env.VERCEL) {
-			app.listen(PORT, () => {
-				console.log(
-					`[Server] Running on port ${PORT} [Mode: ${config.node_env}]`,
-				);
-				console.log(`[API] Base URL: http://localhost:${PORT}/api/v1`);
-			});
-		}
+		// 4. Start HTTP Server
+		app.listen(PORT, () => {
+			console.log(
+				`[Server] Running on port ${PORT} [Mode: ${config.node_env}]`,
+			);
+			console.log(`[API] Base URL: http://localhost:${PORT}/api/v1`);
+		});
 	} catch (error) {
 		console.error("[Fatal] Error starting the server:", error);
 	}
