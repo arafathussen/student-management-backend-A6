@@ -6,7 +6,7 @@ const router = Router();
 
 router.post(
 	"/record",
-	checkAuth("FACULTY", "ADMIN", "SUPER_ADMIN"),
+	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR"),
 	AttendanceController.recordSectionAttendance,
 );
 
@@ -19,7 +19,7 @@ router.get(
 
 router.get(
 	"/section/:sectionId",
-	checkAuth("FACULTY", "ADMIN", "SUPER_ADMIN"),
+	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR"),
 	AttendanceController.getSectionAttendanceSummary,
 );
 

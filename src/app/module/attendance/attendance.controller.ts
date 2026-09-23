@@ -38,7 +38,7 @@ const getStudentAttendance = catchAsync(async (req: Request, res: Response) => {
 
 const getSectionAttendanceSummary = catchAsync(
 	async (req: Request, res: Response) => {
-		const sectionId = req.params.sectionId;
+		const sectionId = req.params.sectionId as string;
 		const result =
 			await AttendanceService.getSectionAttendanceSummary(sectionId);
 

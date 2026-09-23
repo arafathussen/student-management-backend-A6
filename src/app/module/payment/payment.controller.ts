@@ -44,7 +44,7 @@ const getMyPaymentHistory = catchAsync(async (req: Request, res: Response) => {
 
 const downloadPaymentReceiptPDF = catchAsync(
 	async (req: Request, res: Response) => {
-		const paymentId = req.params.paymentId;
+		const paymentId = req.params.paymentId as string;
 		const pdfBuffer = await PaymentService.generatePaymentReceiptPDF(paymentId);
 
 		res.setHeader("Content-Type", "application/pdf");

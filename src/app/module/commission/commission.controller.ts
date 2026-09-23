@@ -17,7 +17,7 @@ const createCommission = catchAsync(async (req: Request, res: Response) => {
 
 const updateCommissionStatus = catchAsync(
 	async (req: Request, res: Response) => {
-		const { id } = req.params;
+		const id = req.params.id as string;
 		const { status, notes } = req.body;
 		const result = await CommissionService.updateCommissionStatus(
 			id,
@@ -36,7 +36,7 @@ const updateCommissionStatus = catchAsync(
 
 const assignStudentReferral = catchAsync(
 	async (req: Request, res: Response) => {
-		const { studentId } = req.params;
+		const studentId = req.params.studentId as string;
 		const { referredByUserId } = req.body;
 		const result = await CommissionService.assignStudentReferral(
 			studentId,
@@ -54,7 +54,7 @@ const assignStudentReferral = catchAsync(
 
 const toggleCounselorCommissionVisibility = catchAsync(
 	async (req: Request, res: Response) => {
-		const { counselorId } = req.params;
+		const counselorId = req.params.counselorId as string;
 		const mode =
 			req.body.mode ||
 			req.body.visibilityMode ||

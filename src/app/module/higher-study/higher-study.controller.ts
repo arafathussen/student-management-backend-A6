@@ -41,7 +41,7 @@ const createGlobalUniversity = catchAsync(
 const updateGlobalUniversity = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await HigherStudyService.updateGlobalUniversity(
-			req.params.id,
+			req.params.id as string,
 			req.body,
 		);
 		sendResponse(res, {
@@ -69,7 +69,7 @@ const getGlobalUniversities = catchAsync(
 const getGlobalUniversityDetails = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await HigherStudyService.getGlobalUniversityDetails(
-			req.params.id,
+			req.params.id as string,
 		);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
@@ -84,7 +84,7 @@ const getGlobalUniversityDetails = catchAsync(
 const addUniversityDocRequirement = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await HigherStudyService.addUniversityDocRequirement(
-			req.params.universityId,
+			req.params.universityId as string,
 			req.body,
 		);
 		sendResponse(res, {
@@ -99,7 +99,7 @@ const addUniversityDocRequirement = catchAsync(
 const getUniversityDocRequirements = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await HigherStudyService.getUniversityDocRequirements(
-			req.params.universityId,
+			req.params.universityId as string,
 		);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
@@ -113,7 +113,7 @@ const getUniversityDocRequirements = catchAsync(
 const deleteUniversityDocRequirement = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await HigherStudyService.deleteUniversityDocRequirement(
-			req.params.reqId,
+			req.params.reqId as string,
 		);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
@@ -191,7 +191,7 @@ const getAllApplications = catchAsync(async (req: Request, res: Response) => {
 });
 
 const assignCounselor = catchAsync(async (req: Request, res: Response) => {
-	const { applicationId } = req.params;
+	const applicationId = req.params.applicationId as string;
 	const { counselorId } = req.body;
 	const result = await HigherStudyService.assignCounselor(
 		applicationId,
@@ -207,7 +207,7 @@ const assignCounselor = catchAsync(async (req: Request, res: Response) => {
 });
 
 const addCounselorNote = catchAsync(async (req: Request, res: Response) => {
-	const { applicationId } = req.params;
+	const applicationId = req.params.applicationId as string;
 	const counselorUserId = req.user!.userId;
 	const result = await HigherStudyService.addCounselorNote(
 		applicationId,
@@ -225,7 +225,7 @@ const addCounselorNote = catchAsync(async (req: Request, res: Response) => {
 
 const uploadApplicationDocument = catchAsync(
 	async (req: Request, res: Response) => {
-		const { documentId } = req.params;
+		const documentId = req.params.documentId as string;
 		const result = await HigherStudyService.uploadApplicationDocument(
 			documentId,
 			req.file as Express.Multer.File,
@@ -241,7 +241,7 @@ const uploadApplicationDocument = catchAsync(
 );
 
 const verifyDocument = catchAsync(async (req: Request, res: Response) => {
-	const { documentId } = req.params;
+	const documentId = req.params.documentId as string;
 	const result = await HigherStudyService.verifyDocument(documentId, req.body);
 
 	sendResponse(res, {
@@ -254,7 +254,7 @@ const verifyDocument = catchAsync(async (req: Request, res: Response) => {
 
 const updateApplicationStage = catchAsync(
 	async (req: Request, res: Response) => {
-		const { applicationId } = req.params;
+		const applicationId = req.params.applicationId as string;
 		const result = await HigherStudyService.updateApplicationStage(
 			applicationId,
 			req.body.status,
@@ -270,7 +270,7 @@ const updateApplicationStage = catchAsync(
 );
 
 const issueOfferLetter = catchAsync(async (req: Request, res: Response) => {
-	const { applicationId } = req.params;
+	const applicationId = req.params.applicationId as string;
 	const result = await HigherStudyService.issueOfferLetter(
 		applicationId,
 		req.file as Express.Multer.File,
@@ -285,7 +285,7 @@ const issueOfferLetter = catchAsync(async (req: Request, res: Response) => {
 });
 
 const downloadOfferLetter = catchAsync(async (req: Request, res: Response) => {
-	const { applicationId } = req.params;
+	const applicationId = req.params.applicationId as string;
 	const studentUserId = req.user!.userId;
 	const result = await HigherStudyService.getOfferLetterDownload(
 		applicationId,
@@ -301,7 +301,7 @@ const downloadOfferLetter = catchAsync(async (req: Request, res: Response) => {
 });
 
 const toggleOfferLetterLock = catchAsync(async (req: Request, res: Response) => {
-	const { applicationId } = req.params;
+	const applicationId = req.params.applicationId as string;
 	const { isOfferUnlocked } = req.body;
 	const result = await HigherStudyService.toggleOfferLetterLock(
 		applicationId,
@@ -342,7 +342,9 @@ const getBlogPosts = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getBlogPostBySlug = catchAsync(async (req: Request, res: Response) => {
-	const result = await HigherStudyService.getBlogPostBySlug(req.params.slug);
+	const result = await HigherStudyService.getBlogPostBySlug(
+		req.params.slug as string,
+	);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -353,7 +355,9 @@ const getBlogPostBySlug = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteBlogPost = catchAsync(async (req: Request, res: Response) => {
-	const result = await HigherStudyService.deleteBlogPost(req.params.id);
+	const result = await HigherStudyService.deleteBlogPost(
+		req.params.id as string,
+	);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

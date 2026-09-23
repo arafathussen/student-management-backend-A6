@@ -6,7 +6,7 @@ const router = Router();
 
 router.post(
 	"/submit",
-	checkAuth("FACULTY", "ADMIN", "SUPER_ADMIN"),
+	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR"),
 	GradingController.submitCourseGrade,
 );
 

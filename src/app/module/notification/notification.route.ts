@@ -12,13 +12,13 @@ router.post(
 
 router.get(
 	"/my",
-	checkAuth("ADMIN", "SUPER_ADMIN", "FACULTY", "STUDENT"),
+	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR", "STUDENT"),
 	NotificationController.getMyNotifications,
 );
 
 router.patch(
 	"/:id/read",
-	checkAuth("ADMIN", "SUPER_ADMIN", "FACULTY", "STUDENT"),
+	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR", "STUDENT"),
 	NotificationController.markNotificationAsRead,
 );
 

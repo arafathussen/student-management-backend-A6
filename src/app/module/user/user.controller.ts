@@ -55,7 +55,7 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
-	const result = await UserService.deleteAdmin(req.params.adminId);
+	const result = await UserService.deleteAdmin(req.params.adminId as string);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -106,7 +106,10 @@ const adminResetUserPassword = catchAsync(
 
 const deleteUser = catchAsync(async (req: Request, res: Response) => {
 	const requesterRole = req.user!.role;
-	const result = await UserService.deleteUser(requesterRole, req.params.userId);
+	const result = await UserService.deleteUser(
+		requesterRole,
+		req.params.userId as string,
+	);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -120,7 +123,7 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
 	const requesterRole = req.user!.role;
 	const result = await UserService.updateUserStatus(
 		requesterRole,
-		req.params.userId,
+		req.params.userId as string,
 		req.body.status,
 	);
 

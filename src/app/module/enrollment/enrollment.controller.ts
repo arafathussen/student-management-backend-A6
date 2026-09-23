@@ -36,7 +36,7 @@ const getMyEnrollments = catchAsync(async (req: Request, res: Response) => {
 
 const dropCourseSection = catchAsync(async (req: Request, res: Response) => {
 	const studentId = req.user!.studentId!;
-	const enrollmentId = req.params.id;
+	const enrollmentId = req.params.id as string;
 	const result = await EnrollmentService.dropCourseSection(
 		studentId,
 		enrollmentId,

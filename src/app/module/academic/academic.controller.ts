@@ -76,7 +76,7 @@ const createSection = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getSectionsByCourse = catchAsync(async (req: Request, res: Response) => {
-	const courseId = req.params.courseId;
+	const courseId = req.params.courseId as string;
 	const semesterId = req.query.semesterId as string | undefined;
 	const result = await AcademicService.getSectionsByCourse(
 		courseId,

@@ -27,7 +27,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getOrCreateRoom = catchAsync(async (req: Request, res: Response) => {
-	const studentUserId = req.params.studentUserId || req.user!.userId;
+	const studentUserId = (req.params.studentUserId as string) || req.user!.userId;
 	const applicationId = req.query.applicationId as string;
 	const result = await ChatService.getOrCreateRoom(
 		studentUserId,
@@ -43,7 +43,7 @@ const getOrCreateRoom = catchAsync(async (req: Request, res: Response) => {
 });
 
 const toggleRoomLock = catchAsync(async (req: Request, res: Response) => {
-	const roomId = req.params.roomId;
+	const roomId = req.params.roomId as string;
 	const agentUserId = req.user!.userId;
 	const agentName = req.user!.email;
 	const lock = req.body.lock !== undefined ? req.body.lock : Boolean(req.body.isLocked);
@@ -66,7 +66,7 @@ const toggleRoomLock = catchAsync(async (req: Request, res: Response) => {
 });
 
 const setChatMode = catchAsync(async (req: Request, res: Response) => {
-	const roomId = req.params.roomId;
+	const roomId = req.params.roomId as string;
 	const { mode } = req.body;
 	const result = await ChatService.setChatMode(roomId, mode);
 
@@ -79,7 +79,7 @@ const setChatMode = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getRoomMessages = catchAsync(async (req: Request, res: Response) => {
-	const roomId = req.params.roomId;
+	const roomId = req.params.roomId as string;
 	const result = await ChatService.getRoomMessages(roomId);
 
 	sendResponse(res, {
@@ -91,7 +91,7 @@ const getRoomMessages = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateStudentBudget = catchAsync(async (req: Request, res: Response) => {
-	const studentUserId = req.params.studentUserId;
+	const studentUserId = req.params.studentUserId as string;
 	const result = await ChatService.updateStudentBudgetInChat(
 		studentUserId,
 		req.body,
@@ -108,7 +108,7 @@ const updateStudentBudget = catchAsync(async (req: Request, res: Response) => {
 const getConversationMessages = catchAsync(
 	async (req: Request, res: Response) => {
 		const currentUserId = req.user!.userId;
-		const otherUserId = req.params.otherUserId;
+		const otherUserId = req.params.otherUserId as string;
 		const result = await ChatService.getConversationMessages(
 			currentUserId,
 			otherUserId,
@@ -125,7 +125,7 @@ const getConversationMessages = catchAsync(
 
 const markMessagesAsRead = catchAsync(async (req: Request, res: Response) => {
 	const currentUserId = req.user!.userId;
-	const senderId = req.params.senderId;
+	const senderId = req.params.senderId as string;
 	const result = await ChatService.markMessagesAsRead(currentUserId, senderId);
 
 	sendResponse(res, {

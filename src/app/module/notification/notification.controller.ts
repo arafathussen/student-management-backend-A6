@@ -32,7 +32,7 @@ const getMyNotifications = catchAsync(async (req: Request, res: Response) => {
 
 const markNotificationAsRead = catchAsync(
 	async (req: Request, res: Response) => {
-		const notificationId = req.params.id;
+		const notificationId = req.params.id as string;
 		const result =
 			await NotificationService.markNotificationAsRead(notificationId);
 
