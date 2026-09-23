@@ -1,9 +1,4 @@
-# Global Study Abroad & University Admission Management System — Backend API
-
-> **Assignment:** Programming Hero Level 2 Batch 7 (B7A6 Enterprise Backend)  
-> **Student Name:** Arafat Hussen  
-> **Student ID:** L2B7-0059  
-> **Tech Stack:** Node.js · Express 5 · TypeScript · **Prisma 7 (`7.9.1`)** · **PostgreSQL (Prisma Accelerate / Pooled)** · **Redis Cloud** · **Stripe** · **Cloudinary** · **Nodemailer (Live Gmail SMTP)** · **JWT & RBAC** · **Postman**
+# Rise Abroad Education — Backend API
 
 ---
 
@@ -811,4 +806,4 @@ npm run build
 ```
 
 ---
-*Built for Programming Hero Level 2 Batch 7 Final Project.*
+*Rise Abroad Education Management System.*
