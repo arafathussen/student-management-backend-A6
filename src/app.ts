@@ -26,17 +26,15 @@ import { CommissionRoutes } from "./app/module/commission/commission.route";
 
 const app: Application = express();
 
+app.set("trust proxy", 1);
+
 // Security Headers
 app.use(helmet());
 
 // CORS Configuration
 app.use(
 	cors({
-		origin: [
-			config.frontend_url,
-			"http://localhost:3000",
-			"http://localhost:5173",
-		],
+		origin: true,
 		credentials: true,
 	}),
 );
