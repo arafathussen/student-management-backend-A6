@@ -1,0 +1,204 @@
+model Country {
+  id           String             @id @default(uuid(7))
+  name         String             @unique
+  code         String             @unique
+  currency     String             @default("EUR")
+  description  String?
+  flagUrl      String?
+
+  isDeleted    Boolean            @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  universities GlobalUniversity[]
+
+  @@map("countries")
+}
+
+model GlobalUniversity {
+  id              String                     @id @default(uuid(7))
+  name            String
+  city            String
+  website         String?
+  logoUrl         String?
+  coverImageUrl   String?
+  description     String?
+  paymentType     UniversityPaymentType      @default(FREE)
+  applicationFee  Decimal                    @default(0.0) @db.Decimal(10, 2)
+  offerDepositFee Decimal                    @default(0.0) @db.Decimal(10, 2)
+
+  countryId       String
+  country         Country                    @relation(fields: [countryId], references: [id])
+
+  programs        GlobalProgram[]
+  docRequirements UniversityDocRequirement[]
+
+  isDeleted       Boolean                    @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+
+  @@map("global_universities")
+}
+
+model UniversityDocRequirement {
+  id           String           @id @default(uuid(7))
+  title        String
+  description  String?
+  isRequired   Boolean          @default(true)
+  docType      String           @default("PDF")
+
+  universityId String
+  university   GlobalUniversity @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("university_doc_requirements")
+}
+
+model GlobalProgram {
+  id                  String                   @id @default(uuid(7))
+  name                String
+  degreeLevel         DegreeLevel              @default(BACHELOR)
+  durationYears       Float                    @default(4.0)
+  tuitionFee          Decimal                  @db.Decimal(10, 2)
+  initialDeposit      Decimal                  @db.Decimal(10, 2)
+  intakeSeason        String?
+  applicationDeadline DateTime?
+  ieltsRequirement    Float?
+  academicRequirement String?
+
+  universityId        String
+  university          GlobalUniversity         @relation(fields: [universityId], references: [id])
+
+  applications        HigherStudyApplication[]
+
+  isDeleted           Boolean                  @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  @@map("global_programs")
+}
+
+model HigherStudyApplication {
+  id                  String                @id @default(uuid(7))
+  applicationNumber   String                @unique
+  status              ApplicationStatus     @default(DRAFT)
+  isFeePaid           Boolean               @default(false)
+  isOfferUnlocked     Boolean               @default(false)
+  offerLetterUrl      String?
+  offerLetterPublicId String?
+  offerIssuedAt       DateTime?
+
+  studentId           String
+  student             Student               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  counselorId         String?
+  counselor           Counselor?            @relation(fields: [counselorId], references: [id])
+
+  programId           String
+  program             GlobalProgram         @relation(fields: [programId], references: [id])
+
+  documents           ApplicationDocument[]
+  payments            Payment[]
+  notes               CounselorNote[]
+
+  isDeleted           Boolean               @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  @@map("higher_study_applications")
+}
+
+model CounselorNote {
+  id            String                 @id @default(uuid(7))
+  note          String
+  isPrivate     Boolean                @default(false)
+
+  applicationId String
+  application   HigherStudyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  counselorId   String
+  counselor     Counselor              @relation(fields: [counselorId], references: [id])
+
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@map("counselor_notes")
+}
+
+model ApplicationDocument {
+  id            String                 @id @default(uuid(7))
+  title         String
+  instruction   String?
+  status        DocumentStatus         @default(REQUIRED)
+  fileUrl       String?
+  filePublicId  String?
+  fileType      String?
+  isCustom      Boolean                @default(false)
+  adminFeedback String?
+  uploadedAt    DateTime?
+
+  applicationId String
+  application   HigherStudyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@map("application_documents")
+}
+
+model BlogPost {
+  id          String   @id @default(uuid(7))
+  title       String
+  slug        String   @unique
+  content     String
+  bannerUrl   String?
+  category    String   @default("Study Abroad Guide")
+  tags        String[] @default([])
+  isPublished Boolean  @default(true)
+
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blog_posts")
+}
+
+model AgencyCommission {
+  id                 String           @id @default(uuid(7))
+  applicationId      String?
+  studentId          String
+  referredByUserId   String
+  referredByUser     User             @relation(fields: [referredByUserId], references: [id])
+
+  universityName     String
+  grossAmount        Decimal          @db.Decimal(10, 2)
+  currency           String           @default("EUR")
+  vatPercentage      Decimal          @default(10.0) @db.Decimal(5, 2)
+  vatAmount          Decimal          @db.Decimal(10, 2)
+  companySharePercentage Decimal      @default(10.0) @db.Decimal(5, 2)
+  companyShareAmount Decimal          @default(0.0) @db.Decimal(10, 2)
+  companyShareAmountBDT Decimal       @default(0.0) @db.Decimal(12, 2)
+  netAmount          Decimal          @db.Decimal(10, 2)
+  exchangeRateToBDT  Decimal          @db.Decimal(10, 2)
+  netAmountBDT       Decimal          @db.Decimal(12, 2)
+  grossAmountBDT     Decimal          @db.Decimal(12, 2)
+
+  status             CommissionStatus @default(PENDING)
+  withdrawnAt        DateTime?
+  notes              String?
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([referredByUserId, status], name: "idx_commission_agent")
+  @@map("agency_commissions")
+}
+

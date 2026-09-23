@@ -1,0 +1,126 @@
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  COUNSELOR
+  STUDENT
+}
+
+enum UniversityPaymentType {
+  FREE
+  UPFRONT_FEE
+  OFFER_DEPOSIT
+}
+
+enum StudentAccessScope {
+  ACADEMIC_ONLY
+  HIGHER_STUDY_ONLY
+  BOTH
+}
+
+enum AuthProvider {
+  CREDENTIAL
+  GOOGLE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum ChatMode {
+  EXCLUSIVE_LOCK
+  COLLABORATIVE_GROUP
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  WITHDRAWN
+}
+
+enum CommissionVisibilityMode {
+  FULL_BREAKDOWN
+  NET_ONLY
+  HIDDEN
+}
+
+enum OtpType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum DegreeLevel {
+  FOUNDATION
+  BACHELOR
+  MASTER
+  PHD
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  DROPPED
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  TUITION_FEE
+  SEMESTER_FEE
+  EXAM_FEE
+  APPLICATION_FEE
+  OFFER_DEPOSIT
+  OTHER
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  DOCS_PENDING
+  UNDER_REVIEW
+  OFFER_ISSUED
+  VISA_PROCESSING
+  ENROLLED
+  REJECTED
+}
+
+enum DocumentStatus {
+  REQUIRED
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum NotificationAudience {
+  ACADEMIC
+  HIGHER_STUDY
+  ALL
+}
+
+enum NotificationPriority {
+  INFO
+  WARNING
+  CRITICAL_ALERT
+  ACTION_REQUIRED
+}

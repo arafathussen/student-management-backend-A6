@@ -1,0 +1,672 @@
+{
+	"info": {
+		"_postman_id": "uni-mgmt-b7a6-study-abroad-collection",
+		"name": "Global Study Abroad & University Admission Management System",
+		"description": "### Global Study Abroad & University Admission Management System API\n\nWelcome to the official API Collection for the Global Study Abroad & University Admission Management System.\n\n---\n\n### 1. Environment & Base URL Switching\nAll requests use the collection variable `{{baseUrl}}`.\n\n- **Local Development:** `http://localhost:5000/api/v1` (Default)\n- **Production / Deployed:** `https://your-deployed-backend-domain.com/api/v1`\n\n> **How to Switch Environment:**\n> 1. Click on this collection's root header: **Global Study Abroad & University Admission Management System**.\n> 2. Open the **Variables** tab.\n> 3. Update the `Current Value` of `baseUrl` to your deployed URL or keep `http://localhost:5000/api/v1` for local testing.\n> 4. Save with `Ctrl + S`. All endpoints will automatically point to the selected environment.\n\n---\n\n### 2. Pre-Configured Test Accounts (RBAC Roles)\n- **Super Admin:** `admin@university.com` | `AdminPassword123!`\n- **Senior Counselor:** `counselor@university.com` | `Counselor123!`\n- **Student Applicant:** `arafat.student@gmail.com` | `Student123!`\n\n---\n\n### 3. Core Functional Modules\n1. **Authentication & Security:** Email OTP verification, Google One-Tap social login, JWT access & refresh tokens.\n2. **Global Higher Study & Universities:** Partner university catalogs, degree programs, dynamic document requirements per campus.\n3. **Application & Counselor Desk:** Multi-university application submission, progression pipeline, document verification & offer letter dispatch.\n4. **3-Way Split Agency Commission Engine:** Gross USD, VAT %, Company %, Counselor Share %, and USD-to-BDT FX conversion ledger.\n5. **Multi-Agent Admissions Chat:** Exclusive 1-on-1 lock mode, collaborative desk, and in-chat student budget updater.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "superAdminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "counselorToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "studentToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication & Security",
+			"item": [
+				{
+					"name": "Register Student",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Arafat Hussen\",\n  \"email\": \"arafat.student@gmail.com\",\n  \"password\": \"Student123!\",\n  \"contactNumber\": \"+8801700000000\",\n  \"address\": \"Dhaka, Bangladesh\",\n  \"gender\": \"MALE\",\n  \"accessScope\": \"HIGHER_STUDY_ONLY\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+					}
+				},
+				{
+					"name": "Verify Email with 6-Digit OTP",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"arafat.student@gmail.com\",\n  \"otpCode\": \"123456\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/verify-email", "host": ["{{baseUrl}}"], "path": ["auth", "verify-email"] }
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"arafat.student@gmail.com\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/resend-otp", "host": ["{{baseUrl}}"], "path": ["auth", "resend-otp"] }
+					}
+				},
+				{
+					"name": "Login (Super Admin / Admin / Counselor / Student)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@university.com\",\n  \"password\": \"AdminPassword123!\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+					}
+				},
+				{
+					"name": "Google Social Login (One-Tap)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idToken\": \"google-id-token-here\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/google", "host": ["{{baseUrl}}"], "path": ["auth", "google"] }
+					}
+				},
+				{
+					"name": "Forgot Password (Request OTP)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"arafat.student@gmail.com\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["auth", "forgot-password"] }
+					}
+				},
+				{
+					"name": "Reset Password (With OTP)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"arafat.student@gmail.com\",\n  \"otpCode\": \"123456\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["auth", "reset-password"] }
+					}
+				},
+				{
+					"name": "Change Password (Authenticated)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"Student123!\",\n  \"newPassword\": \"StudentNewPass123!\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "2. User & RBAC Management",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/users/me", "host": ["{{baseUrl}}"], "path": ["users", "me"] }
+					}
+				},
+				{
+					"name": "Create Admin (Super Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Academic Admin 1\",\n  \"email\": \"admin1@university.com\",\n  \"password\": \"Admin12345!\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users/create-admin", "host": ["{{baseUrl}}"], "path": ["users", "create-admin"] }
+					}
+				},
+				{
+					"name": "Delete Admin (Super Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/users/admin/ADMIN_ID_HERE", "host": ["{{baseUrl}}"], "path": ["users", "admin", "ADMIN_ID_HERE"] }
+					}
+				},
+				{
+					"name": "Create Counselor (Super Admin or Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Sarah Jenkins\",\n  \"email\": \"sarah.counselor@university.com\",\n  \"password\": \"Counselor123!\",\n  \"designation\": \"Senior European Education Counselor\",\n  \"contactNumber\": \"+8801711223344\",\n  \"specialization\": \"Cyprus & UK Admissions\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users/create-counselor", "host": ["{{baseUrl}}"], "path": ["users", "create-counselor"] }
+					}
+				},
+				{
+					"name": "Custom Create User (Super Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Custom Branch Officer\",\n  \"email\": \"officer@branch.university.com\",\n  \"password\": \"Officer12345!\",\n  \"role\": \"COUNSELOR\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users/custom-create", "host": ["{{baseUrl}}"], "path": ["users", "custom-create"] }
+					}
+				},
+				{
+					"name": "Admin Reset User Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"USER_ID_HERE\",\n  \"newPassword\": \"ResetPass12345!\",\n  \"sendResetEmail\": false\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users/reset-user-password", "host": ["{{baseUrl}}"], "path": ["users", "reset-user-password"] }
+					}
+				},
+				{
+					"name": "Update User Status (ACTIVE / BLOCKED)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"BLOCKED\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users/USER_ID_HERE/status", "host": ["{{baseUrl}}"], "path": ["users", "USER_ID_HERE", "status"] }
+					}
+				},
+				{
+					"name": "Get All Users (Filtered by RBAC)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/users?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["users"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Global Higher Study & Universities",
+			"item": [
+				{
+					"name": "Get All Countries",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/higher-study/countries", "host": ["{{baseUrl}}"], "path": ["higher-study", "countries"] }
+					}
+				},
+				{
+					"name": "Create Country (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"United Kingdom\",\n  \"code\": \"GB\",\n  \"currency\": \"GBP\",\n  \"description\": \"Study in the UK - Top ranking universities with post-study work visa opportunities.\",\n  \"flagUrl\": \"https://flagcdn.com/w320/gb.png\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/countries", "host": ["{{baseUrl}}"], "path": ["higher-study", "countries"] }
+					}
+				},
+				{
+					"name": "Get Global Universities",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/higher-study/universities?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["higher-study", "universities"] }
+					}
+				},
+				{
+					"name": "Create Global University (With Payment Type & Fees)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"American University of Cyprus\",\n  \"city\": \"Larnaca\",\n  \"countryId\": \"COUNTRY_ID_HERE\",\n  \"website\": \"https://aucy.ac.cy\",\n  \"description\": \"Premier American curriculum institution in Cyprus.\",\n  \"paymentType\": \"OFFER_DEPOSIT\",\n  \"applicationFee\": 0,\n  \"offerDepositFee\": 500\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/universities", "host": ["{{baseUrl}}"], "path": ["higher-study", "universities"] }
+					}
+				},
+				{
+					"name": "Add Dynamic Document Requirement to University",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Valid Passport Copy\",\n  \"description\": \"Scanned copy of bio-data page (Min 2 years validity)\",\n  \"isRequired\": true,\n  \"docType\": \"PDF\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/universities/UNIVERSITY_ID_HERE/doc-requirements", "host": ["{{baseUrl}}"], "path": ["higher-study", "universities", "UNIVERSITY_ID_HERE", "doc-requirements"] }
+					}
+				},
+				{
+					"name": "Get University Doc Requirements",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/higher-study/universities/UNIVERSITY_ID_HERE/doc-requirements", "host": ["{{baseUrl}}"], "path": ["higher-study", "universities", "UNIVERSITY_ID_HERE", "doc-requirements"] }
+					}
+				},
+				{
+					"name": "Get Global Degree Programs",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/higher-study/programs?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["higher-study", "programs"] }
+					}
+				},
+				{
+					"name": "Create Degree Program (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"BSc in Computer Science\",\n  \"universityId\": \"UNIVERSITY_ID_HERE\",\n  \"degreeLevel\": \"BACHELOR\",\n  \"durationYears\": 4.0,\n  \"tuitionFee\": 6650.0,\n  \"initialDeposit\": 4000.0,\n  \"intakeSeason\": \"Fall 2026\",\n  \"ieltsRequirement\": 5.0,\n  \"academicRequirement\": \"Minimum 60% in HSC\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/programs", "host": ["{{baseUrl}}"], "path": ["higher-study", "programs"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Student Applications & Counselor Desk",
+			"item": [
+				{
+					"name": "Apply for Degree Program (Student)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"programId\": \"PROGRAM_ID_HERE\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/apply", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "apply"] }
+					}
+				},
+				{
+					"name": "Get My Applications (Student)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/my", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "my"] }
+					}
+				},
+				{
+					"name": "Get All Applications (Admin & Counselor)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/higher-study/applications?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications"] }
+					}
+				},
+				{
+					"name": "Assign Counselor to Application",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"counselorId\": \"COUNSELOR_ID_HERE\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/APPLICATION_ID_HERE/assign-counselor", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "APPLICATION_ID_HERE", "assign-counselor"] }
+					}
+				},
+				{
+					"name": "Add Counselor Note (Private or Public to Student)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{counselorToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"note\": \"Please re-upload your bank statement as the current copy is older than 3 months.\",\n  \"isPrivate\": false\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/APPLICATION_ID_HERE/notes", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "APPLICATION_ID_HERE", "notes"] }
+					}
+				},
+				{
+					"name": "Verify Document Status (Counselor / Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{counselorToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"VERIFIED\",\n  \"adminFeedback\": \"Passport copy verified successfully!\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/documents/DOCUMENT_ID_HERE/verify", "host": ["{{baseUrl}}"], "path": ["higher-study", "documents", "DOCUMENT_ID_HERE", "verify"] }
+					}
+				},
+				{
+					"name": "Update Application Stage Pipeline",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{counselorToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"SUBMITTED_TO_UNIVERSITY\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/APPLICATION_ID_HERE/stage", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "APPLICATION_ID_HERE", "stage"] }
+					}
+				},
+				{
+					"name": "Issue & Upload Offer Letter (Counselor / Admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Authorization", "value": "Bearer {{counselorToken}}" }],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "file", "type": "file", "src": "" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/APPLICATION_ID_HERE/issue-offer-letter", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "APPLICATION_ID_HERE", "issue-offer-letter"] }
+					}
+				},
+				{
+					"name": "Toggle Offer Letter Lock / Free Download (Admin / Super Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isOfferUnlocked\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/APPLICATION_ID_HERE/toggle-offer-lock", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "APPLICATION_ID_HERE", "toggle-offer-lock"] }
+					}
+				},
+				{
+					"name": "Download Offer Letter (Check Unlock Status - Student)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+						"url": { "raw": "{{baseUrl}}/higher-study/applications/APPLICATION_ID_HERE/download-offer-letter", "host": ["{{baseUrl}}"], "path": ["higher-study", "applications", "APPLICATION_ID_HERE", "download-offer-letter"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Agency Commission & Payout Ledger",
+			"item": [
+				{
+					"name": "Create Commission (Super Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"STUDENT_ID_HERE\",\n  \"referredByUserId\": \"COUNSELOR_USER_ID_HERE\",\n  \"universityName\": \"American University of Cyprus\",\n  \"grossAmount\": 1000,\n  \"currency\": \"EUR\",\n  \"vatPercentage\": 10,\n  \"exchangeRateToBDT\": 135,\n  \"notes\": \"Direct Fall 2026 admission commission\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/commissions", "host": ["{{baseUrl}}"], "path": ["commissions"] }
+					}
+				},
+				{
+					"name": "Mark Payout Status (Super Admin Only)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"WITHDRAWN\",\n  \"notes\": \"Bank transfer completed to Counselor bank account\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/commissions/COMMISSION_ID_HERE/status", "host": ["{{baseUrl}}"], "path": ["commissions", "COMMISSION_ID_HERE", "status"] }
+					}
+				},
+				{
+					"name": "Assign Student Referral (Admin & Super Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"referredByUserId\": \"COUNSELOR_OR_ADMIN_USER_ID\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/commissions/referral/STUDENT_ID_HERE", "host": ["{{baseUrl}}"], "path": ["commissions", "referral", "STUDENT_ID_HERE"] }
+					}
+				},
+				{
+					"name": "Toggle Counselor Commission Visibility (Super Admin / Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"canViewCommission\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/commissions/counselor/COUNSELOR_ID_HERE/visibility", "host": ["{{baseUrl}}"], "path": ["commissions", "counselor", "COUNSELOR_ID_HERE", "visibility"] }
+					}
+				},
+				{
+					"name": "Get My Referral Ledger (Counselor / Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{counselorToken}}" }],
+						"url": { "raw": "{{baseUrl}}/commissions/my-ledger", "host": ["{{baseUrl}}"], "path": ["commissions", "my-ledger"] }
+					}
+				},
+				{
+					"name": "Get Master Financial Summary (Super Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/commissions/all-ledger?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["commissions", "all-ledger"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Educational Blog & News Portal",
+			"item": [
+				{
+					"name": "Create Blog Post (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Top 5 European Study Destinations with Low Tuition Fees in 2026\",\n  \"content\": \"Explore affordable higher education opportunities in Cyprus, Germany, Poland, and Hungary...\",\n  \"category\": \"Scholarship & Destination Guide\",\n  \"tags\": [\"Europe\", \"Scholarships\", \"Cyprus\", \"Visa\"],\n  \"bannerUrl\": \"https://images.unsplash.com/photo-1523240795612-9a054b0db644\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/higher-study/blogs", "host": ["{{baseUrl}}"], "path": ["higher-study", "blogs"] }
+					}
+				},
+				{
+					"name": "Get All Published Blog Posts",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/higher-study/blogs?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["higher-study", "blogs"] }
+					}
+				},
+				{
+					"name": "Get Blog Post By Slug",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/higher-study/blogs/complete-study-in-cyprus-guide-2026", "host": ["{{baseUrl}}"], "path": ["higher-study", "blogs", "complete-study-in-cyprus-guide-2026"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Multi-Role Support Chat & Room Lock",
+			"item": [
+				{
+					"name": "Send Chat Message (With Persona Masking & Role Badge)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentUserId\": \"STUDENT_USER_ID_HERE\",\n  \"message\": \"Hello Arafat, our admissions committee has reviewed your application for Cyprus.\",\n  \"senderDisplayName\": \"Admissions Desk (Admin)\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/chat/send", "host": ["{{baseUrl}}"], "path": ["chat", "send"] }
+					}
+				},
+				{
+					"name": "Get Chat Room Messages",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/chat/room/messages/ROOM_ID_HERE", "host": ["{{baseUrl}}"], "path": ["chat", "room", "messages", "ROOM_ID_HERE"] }
+					}
+				},
+				{
+					"name": "Toggle Chat Exclusive Lock (Takeover Mode)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{counselorToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lock\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/chat/room/ROOM_ID_HERE/lock", "host": ["{{baseUrl}}"], "path": ["chat", "room", "ROOM_ID_HERE", "lock"] }
+					}
+				},
+				{
+					"name": "Update Student Target Budget in Chat",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetBudget\": 8000,\n  \"preferredCurrency\": \"USD\",\n  \"preferredCountry\": \"Cyprus\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/chat/student/STUDENT_USER_ID_HERE/budget", "host": ["{{baseUrl}}"], "path": ["chat", "student", "STUDENT_USER_ID_HERE", "budget"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Stripe Payments & Invoices",
+			"item": [
+				{
+					"name": "Create Stripe Payment Intent (Fee / Deposit)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 500,\n  \"currency\": \"USD\",\n  \"paymentType\": \"OFFER_DEPOSIT\",\n  \"higherStudyApplicationId\": \"APPLICATION_ID_HERE\",\n  \"description\": \"Initial offer letter release deposit for AUCY\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/payments/create-intent", "host": ["{{baseUrl}}"], "path": ["payments", "create-intent"] }
+					}
+				},
+				{
+					"name": "Get My Payments & Invoices",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+						"url": { "raw": "{{baseUrl}}/payments/my-payments", "host": ["{{baseUrl}}"], "path": ["payments", "my-payments"] }
+					}
+				}
+			]
+		}
+	]
+}

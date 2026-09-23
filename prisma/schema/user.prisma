@@ -1,0 +1,120 @@
+model User {
+  id                 String             @id @default(uuid(7))
+  name               String
+  email              String             @unique
+  password           String?
+  googleId           String?            @unique
+  authProvider       AuthProvider       @default(CREDENTIAL)
+  role               Role               @default(STUDENT)
+  status             UserStatus         @default(ACTIVE)
+  isEmailVerified    Boolean            @default(false)
+  otpCode            String?
+  otpExpiresAt       DateTime?
+  otpType            OtpType?
+  imageUrl           String             @default("")
+  imagePublicId      String             @default("")
+  isDeleted          Boolean            @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  student            Student?           @relation("UserStudentProfile")
+  faculty            Faculty?
+  counselor          Counselor?
+  blogPosts          BlogPost[]
+
+  referredStudents   Student[]          @relation("ReferredStudents")
+  commissions        AgencyCommission[]
+
+  sentMessages       ChatMessage[]      @relation("SentMessages")
+  receivedMessages   ChatMessage[]      @relation("ReceivedMessages")
+  notifications      Notification[]
+
+  @@index([email], name: "idx_user_email")
+  @@map("users")
+}
+
+model Student {
+  id                 String             @id @default(uuid(7))
+  studentId          String             @unique
+  contactNumber      String?
+  address            String?
+  gender             Gender?
+  dateOfBirth        DateTime?
+  accessScope        StudentAccessScope @default(BOTH)
+
+  targetBudget       Decimal?           @db.Decimal(10, 2)
+  preferredCurrency  String?            @default("USD")
+  preferredCountry   String?
+
+  referredByUserId   String?
+  referredByUser     User?              @relation("ReferredStudents", fields: [referredByUserId], references: [id])
+
+  isDeleted          Boolean            @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  userId             String             @unique
+  user               User               @relation("UserStudentProfile", fields: [userId], references: [id], onDelete: Cascade)
+
+  departmentId       String?
+  department         Department?        @relation(fields: [departmentId], references: [id])
+
+  enrollments        Enrollment[]
+  attendances        CourseAttendance[]
+  grades             CourseResult[]
+  payments           Payment[]
+  higherStudyApps    HigherStudyApplication[]
+
+  @@index([studentId], name: "idx_student_studentId")
+  @@map("students")
+}
+
+model Faculty {
+  id                 String             @id @default(uuid(7))
+  facultyId          String             @unique
+  designation        String
+  contactNumber      String?
+
+  isDeleted          Boolean            @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  userId             String             @unique
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  departmentId       String?
+  department         Department?        @relation(fields: [departmentId], references: [id])
+
+  sections           Section[]
+
+  @@index([facultyId], name: "idx_faculty_facultyId")
+  @@map("faculties")
+}
+
+model Counselor {
+  id                 String             @id @default(uuid(7))
+  counselorId        String             @unique
+  designation        String             @default("Study Abroad Counselor")
+  contactNumber      String?
+  specialization             String?
+  commissionVisibilityMode   CommissionVisibilityMode @default(HIDDEN)
+  defaultVatPercentage       Decimal                  @default(10.0) @db.Decimal(5, 2)
+  defaultCompanySharePercentage Decimal               @default(10.0) @db.Decimal(5, 2)
+
+  isDeleted          Boolean            @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  userId             String             @unique
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  assignedApplications HigherStudyApplication[]
+  counselorNotes     CounselorNote[]
+
+  @@index([counselorId], name: "idx_counselor_counselorId")
+  @@map("counselors")
+}

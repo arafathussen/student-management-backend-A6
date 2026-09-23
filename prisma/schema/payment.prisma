@@ -1,0 +1,28 @@
+model Payment {
+  id                    String        @id @default(uuid(7))
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("USD")
+  paymentType           PaymentType   @default(TUITION_FEE)
+  status                PaymentStatus @default(PENDING)
+
+  stripeSessionId       String?       @unique
+  stripePaymentIntentId String?       @unique
+  stripeReceiptUrl      String?
+  paidAt                DateTime?
+  description           String?
+
+  studentId             String
+  student               Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  semesterId            String?
+  semester              Semester?     @relation(fields: [semesterId], references: [id])
+
+  higherStudyApplicationId String?
+  higherStudyApplication   HigherStudyApplication? @relation(fields: [higherStudyApplicationId], references: [id])
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([stripeSessionId], name: "idx_payment_stripe_session")
+  @@map("payments")
+}

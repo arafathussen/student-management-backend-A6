@@ -1,0 +1,23 @@
+model CourseResult {
+  id          String    @id @default(uuid(7))
+  marks       Float
+  gradePoint  Float
+  letterGrade String
+  remarks     String?
+  isPublished Boolean   @default(false)
+
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  sectionId   String
+  section     Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  semesterId  String
+  semester    Semester  @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([studentId, sectionId], name: "unique_student_course_grade")
+  @@map("course_results")
+}
