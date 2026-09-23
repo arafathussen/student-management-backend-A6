@@ -8,15 +8,7 @@ const PORT = config.port;
 
 const main = async () => {
 	try {
-		// 1. Start HTTP Server immediately
-		app.listen(PORT, () => {
-			console.log(
-				`[Server] Running on port ${PORT} [Mode: ${config.node_env}]`,
-			);
-			console.log(`[API] Base URL: http://localhost:${PORT}/api/v1`);
-		});
-
-		// 2. Connect Prisma Database
+		// 1. Connect Prisma Database
 		try {
 			await prisma.$connect();
 			console.log(
@@ -29,7 +21,7 @@ const main = async () => {
 			);
 		}
 
-		// 3. Connect Redis (Optional / Non-blocking)
+		// 2. Connect Redis (Optional / Non-blocking)
 		try {
 			await redisClient.connect();
 			console.log("[Redis] Connected Successfully.");
@@ -40,16 +32,27 @@ const main = async () => {
 			);
 		}
 
-		// 4. Auto-Seed Initial Admin & Demo Catalog
+		// 3. Auto-Seed Initial Admin & Demo Catalog
 		try {
 			await seedInitialData();
 		} catch (seedError: any) {
 			console.log("[Seed] Notice:", seedError.message);
 		}
+
+		// 4. Start HTTP Server only in standalone server mode (not inside Vercel serverless worker)
+		if (!process.env.VERCEL) {
+			app.listen(PORT, () => {
+				console.log(
+					`[Server] Running on port ${PORT} [Mode: ${config.node_env}]`,
+				);
+				console.log(`[API] Base URL: http://localhost:${PORT}/api/v1`);
+			});
+		}
 	} catch (error) {
 		console.error("[Fatal] Error starting the server:", error);
-		process.exit(1);
 	}
 };
 
 main();
+
+export default app;
