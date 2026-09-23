@@ -6,7 +6,7 @@
 - **Postman Collection File:** [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json)
 - **Local API Base URL:** `http://localhost:5000/api/v1`
 - **Frontend Dev URL:** `http://localhost:3000`
-- **Live Production URL:** `https://your-deployed-domain.com/api/v1` *(Replace when deployed)*
+- **Live Production URL:** `https://rise-abroad-student-management.vercel.app/api/v1`
 
 ---
 
@@ -31,11 +31,11 @@ Use these active accounts seeded in the PostgreSQL database for testing all role
 
 ### Step 2: Switching Between Localhost & Live Production URL
 The collection uses a single dynamic variable `{{baseUrl}}` for every request:
-1. Click on the collection title: **`Global Study Abroad & University Admission Management System`**.
+1. Click on the collection title: **`Rise Abroad Education Management System`**.
 2. Navigate to the **Variables** tab.
 3. Edit the `Current Value` of `baseUrl`:
    - **For Local Testing:** `http://localhost:5000/api/v1`
-   - **For Live Production:** `https://your-production-domain.com/api/v1`
+   - **For Live Production:** `https://rise-abroad-student-management.vercel.app/api/v1`
 4. Press `Ctrl + S` (or `Cmd + S`) to save. Every endpoint in the collection will now point to your target server!
 
 ### Step 3: Managing JWT Authorization Tokens
@@ -777,11 +777,11 @@ When you deploy this backend to a live server (e.g., **Vercel**, **Railway**, **
    - `STRIPE_SECRET_KEY` & `STRIPE_WEBHOOK_SECRET`
    - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 2. **Update Postman `baseUrl`:**
-   - Change `baseUrl` variable to `https://your-live-domain.com/api/v1`
+   - Change `baseUrl` variable to `https://rise-abroad-student-management.vercel.app/api/v1`
 3. **Update Frontend Environment Variable:**
    - In `university-management-frontend/.env.local` or hosting provider settings:
    ```env
-   NEXT_PUBLIC_API_URL=https://your-live-domain.com/api/v1
+   NEXT_PUBLIC_API_URL=https://rise-abroad-student-management.vercel.app/api/v1
    ```
 
 ---
