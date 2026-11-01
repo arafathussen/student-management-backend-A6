@@ -12,7 +12,7 @@ A secure, scalable RESTful backend built with **TypeScript, Express 5, PostgreSQ
 | **Local API Base URL** | `http://localhost:5000/api/v1` | Local development server |
 | **GitHub Repository** | [student-management-backend-A6](https://github.com/arafathussen/student-management-backend-A6) | Complete source code with 39+ meaningful commits |
 | **Postman Collection (File)** | [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json) | 13 folders, 74 structured requests v2.1.0 |
-| **Postman Published Docs** | `https://documenter.getpostman.com/view/YOUR_VIEW_ID` | Interactive web documentation (Publish from Postman) |
+| **Postman Published Docs** | [Interactive Web Documentation](https://documenter.getpostman.com/view/56453818/2sBYHXPxia) | Live API documentation and interactive testing |
 
 ---
 
