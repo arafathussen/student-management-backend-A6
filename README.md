@@ -1,8 +1,6 @@
-# 🎓 University Management System — Enterprise Backend API
-> **Level 2 Web Development — Batch 7 Assignment 6 (B7A6)**  
-> **Student ID Category:** Ending with **9** ➔ **University Management System**
+# 🎓 University Management Backend
 
-An enterprise-grade, scalable, and secure RESTful backend API built with **Node.js, TypeScript, Express 5, PostgreSQL, and Prisma ORM**. Features complete role-based access control (RBAC) across 3 distinct roles, transaction-safe course enrollment with prerequisite and seat capacity management, automated GPA/transcript PDF generation, real Stripe checkout payment processing, and comprehensive administrative analytics.
+A secure, scalable RESTful backend built with **TypeScript, Express 5, PostgreSQL, and Prisma ORM**. Features 3-tier RBAC, transaction-safe course enrollment, automated GPA calculation, PDF transcripts, and Stripe checkout payment integration.
 
 ---
 
