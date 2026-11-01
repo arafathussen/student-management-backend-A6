@@ -7,6 +7,7 @@ import { AppError } from "../../utils/AppError";
 import {
 	sendPasswordResetOtpEmail,
 	sendVerificationOtpEmail,
+	sendWelcomeRegistrationEmail,
 } from "../../utils/emailHelper";
 import { jwtUtils } from "../../utils/jwt";
 import type {
@@ -154,6 +155,11 @@ const verifyEmail = async (payload: { email: string; otpCode: string }) => {
 		include: { student: true },
 	});
 
+	// Dispatch beautiful welcome confirmation email asynchronously
+	sendWelcomeRegistrationEmail(updatedUser.email, updatedUser.name).catch(
+		() => null,
+	);
+
 	const accessToken = jwtUtils.createToken(
 		{
 			userId: updatedUser.id,
@@ -237,10 +243,17 @@ const loginUser = async (payload: ILoginPayload) => {
 		},
 	});
 
-	if (!user || user.isDeleted) {
+	if (!user || user.isDeleted || user.status === "DELETED") {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
-			"User does not exist with this email!",
+			"No account found with this email address. Please sign up first.",
+		);
+	}
+
+	if (user.status === "BLOCKED") {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Your account has been banned by the administrator. Please contact your admin.",
 		);
 	}
 
@@ -248,13 +261,6 @@ const loginUser = async (payload: ILoginPayload) => {
 		throw new AppError(
 			httpStatus.FORBIDDEN,
 			"Your email is not verified yet. Please verify your account with the OTP sent to your Gmail.",
-		);
-	}
-
-	if (user.status === "BLOCKED") {
-		throw new AppError(
-			httpStatus.FORBIDDEN,
-			"Your account has been suspended/blocked by the administrator!",
 		);
 	}
 
@@ -272,6 +278,12 @@ const loginUser = async (payload: ILoginPayload) => {
 			"Invalid credentials. Password incorrect!",
 		);
 	}
+
+	// Update user activity timestamp on login
+	await prisma.user.update({
+		where: { id: user.id },
+		data: { updatedAt: new Date() },
+	});
 
 	const accessToken = jwtUtils.createToken(
 		{
@@ -301,6 +313,8 @@ const loginUser = async (payload: ILoginPayload) => {
 			name: user.name,
 			email: user.email,
 			role: user.role,
+			imageUrl: user.imageUrl || "",
+			contactNumber: user.contactNumber || null,
 			studentId: user.student?.studentId,
 			counselorId: user.counselor?.counselorId,
 			accessScope: user.student?.accessScope,
@@ -315,6 +329,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 		if (
 			config.google_client_id &&
 			config.google_client_id !== "demo_client_id" &&
+			payload.idToken &&
 			payload.idToken !== "mock-google-id-token"
 		) {
 			const ticket = await googleClient.verifyIdToken({
@@ -323,16 +338,16 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 			});
 			googlePayload = ticket.getPayload();
 		} else {
-			// Mock token decoding for development / testing when Google Client ID is demo or mock test
-			googlePayload = {
-				email: "arafat.student@gmail.com",
-				name: "Google Student",
-				sub: `google-mock-${Date.now()}`,
-				picture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-			};
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				"Valid Google authentication token is required.",
+			);
 		}
 	} catch (error: any) {
-		throw new AppError(httpStatus.BAD_REQUEST, "Google authentication failed!");
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			error?.message || "Google authentication failed!",
+		);
 	}
 
 	if (!googlePayload?.email) {
@@ -348,6 +363,21 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 		where: { email },
 		include: { student: true, counselor: true },
 	});
+
+	if (user) {
+		if (user.isDeleted || user.status === "DELETED") {
+			throw new AppError(
+				httpStatus.NOT_FOUND,
+				"No account found with this email address. Please sign up first.",
+			);
+		}
+		if (user.status === "BLOCKED") {
+			throw new AppError(
+				httpStatus.FORBIDDEN,
+				"Your account has been banned by the administrator. Please contact your admin.",
+			);
+		}
+	}
 
 	if (!user) {
 		user = await prisma.$transaction(async (tx) => {
@@ -374,10 +404,11 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 
 			return { ...newUser, student: newStudent, counselor: null };
 		});
-	} else if (!user.isEmailVerified || user.status === "INACTIVE") {
+	} else {
+		// Update activity timestamp for active returning user
 		user = await prisma.user.update({
 			where: { email },
-			data: { isEmailVerified: true, status: "ACTIVE" },
+			data: { updatedAt: new Date() },
 			include: { student: true, counselor: true },
 		});
 	}
@@ -410,6 +441,8 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 			name: user.name,
 			email: user.email,
 			role: user.role,
+			imageUrl: user.imageUrl || "",
+			contactNumber: user.contactNumber || null,
 			studentId: user.student?.studentId,
 			counselorId: user.counselor?.counselorId,
 			accessScope: user.student?.accessScope,

@@ -1,7 +1,7 @@
 {
     "name": "university-and-higher-study-management-backend",
     "version": "1.0.0",
-    "description": "Enterprise-grade REST API for Unified University & Global Higher Study Management System",
+    "description": "Enterprise-grade REST API for Rise Abroad Education Platform",
     "main": "dist/server.js",
     "type": "module",
     "scripts": {
@@ -33,6 +33,7 @@
         "jsonwebtoken": "^9.0.3",
         "multer": "^2.2.0",
         "nodemailer": "^9.0.5",
+        "pdf-lib": "^1.17.1",
         "pdfkit": "^0.20.1",
         "pg": "^8.22.0",
         "redis": "^6.2.0",

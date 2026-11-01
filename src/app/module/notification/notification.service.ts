@@ -29,7 +29,20 @@ const createNotification = async (payload: {
 };
 
 const getMyNotifications = async (userId: string, userScope?: string) => {
+	// Auto delete notifications older than 3 days (3-Day TTL Cleanup)
+	const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+	try {
+		await prisma.notification.deleteMany({
+			where: {
+				createdAt: { lt: threeDaysAgo },
+			},
+		});
+	} catch (cleanupErr: any) {
+		console.error("Failed to auto-cleanup expired notifications:", cleanupErr?.message);
+	}
+
 	const whereConditions: any = {
+		createdAt: { gte: threeDaysAgo },
 		OR: [{ userId }, { userId: null }],
 	};
 
@@ -42,7 +55,7 @@ const getMyNotifications = async (userId: string, userScope?: string) => {
 	const notifications = await prisma.notification.findMany({
 		where: whereConditions,
 		orderBy: { createdAt: "desc" },
-		take: 30,
+		take: 50,
 	});
 
 	return notifications;
@@ -57,8 +70,21 @@ const markNotificationAsRead = async (notificationId: string) => {
 	return notification;
 };
 
+const markAllNotificationsAsRead = async (userId: string) => {
+	const result = await prisma.notification.updateMany({
+		where: {
+			OR: [{ userId }, { userId: null }],
+			isRead: false,
+		},
+		data: { isRead: true },
+	});
+
+	return result;
+};
+
 export const NotificationService = {
 	createNotification,
 	getMyNotifications,
 	markNotificationAsRead,
+	markAllNotificationsAsRead,
 };

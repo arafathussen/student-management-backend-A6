@@ -11,6 +11,7 @@ model User {
   otpCode            String?
   otpExpiresAt       DateTime?
   otpType            OtpType?
+  contactNumber      String?
   imageUrl           String             @default("")
   imagePublicId      String             @default("")
   isDeleted          Boolean            @default(false)

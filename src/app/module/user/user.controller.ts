@@ -135,6 +135,22 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const updateUserRole = catchAsync(async (req: Request, res: Response) => {
+	const requesterRole = req.user!.role;
+	const result = await UserService.updateUserRole(
+		requesterRole,
+		req.params.userId as string,
+		req.body.role,
+	);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: `User role updated successfully to ${req.body.role}!`,
+		data: result,
+	});
+});
+
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 	const requesterRole = req.user!.role;
 	const result = await UserService.getAllUsers(req.query, requesterRole);
@@ -159,5 +175,6 @@ export const UserController = {
 	adminResetUserPassword,
 	deleteUser,
 	updateUserStatus,
+	updateUserRole,
 	getAllUsers,
 };

@@ -10,4 +10,8 @@ router.get(
 	AdminController.getDashboardStats,
 );
 
+// Public visitor tracking routes
+router.post("/visitor-ping", AdminController.recordVisitorPing);
+router.get("/visitor-stats", AdminController.getVisitorStats);
+
 export const AdminRoutes = router;

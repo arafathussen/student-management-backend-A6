@@ -10,6 +10,9 @@ import type { IQuery } from "../../interfaces";
 import { cloudinary } from "../../lib/cloudinary";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
+import PDFDocument from "pdfkit";
+import { PDFDocument as PDFLibDoc } from "pdf-lib";
+import { ChecklistPresetService } from "./checklist-preset.service";
 
 // 1. Countries
 const createCountry = async (payload: {
@@ -79,10 +82,82 @@ const createGlobalUniversity = async (payload: {
 	return university;
 };
 
+export const extractCloudinaryPublicId = (url?: string): string | null => {
+	if (!url || typeof url !== "string" || !url.includes("cloudinary.com")) return null;
+	try {
+		const parts = url.split("/upload/");
+		if (parts.length < 2) return null;
+		let remaining = parts[1];
+		remaining = remaining.replace(/^v\d+\//, "");
+		const lastDotIndex = remaining.lastIndexOf(".");
+		if (lastDotIndex !== -1) {
+			remaining = remaining.substring(0, lastDotIndex);
+		}
+		return remaining;
+	} catch {
+		return null;
+	}
+};
+
+const uploadUniversityCover = async (file: Express.Multer.File) => {
+	if (!file) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Please provide an image file!");
+	}
+
+	const uploadResult = await new Promise<any>((resolve, reject) => {
+		cloudinary.uploader
+			.upload_stream(
+				{
+					resource_type: "image",
+					folder: "university/covers",
+				},
+				(error, result) => {
+					if (error) return reject(error);
+					resolve(result);
+				},
+			)
+			.end(file.buffer);
+	});
+
+	return {
+		url: uploadResult.secure_url,
+		publicId: uploadResult.public_id,
+	};
+};
+
+const deleteUniversityImage = async (payload: { publicId?: string; imageUrl?: string }) => {
+	const targetPublicId = payload.publicId || extractCloudinaryPublicId(payload.imageUrl);
+	if (!targetPublicId) {
+		return { message: "No Cloudinary asset found to remove." };
+	}
+
+	try {
+		await cloudinary.uploader.destroy(targetPublicId, { resource_type: "image" });
+		return { message: "Image removed from Cloudinary successfully!" };
+	} catch (err: any) {
+		console.error("Failed to delete image from Cloudinary:", err);
+		return { message: "Failed to delete image from Cloudinary." };
+	}
+};
+
 const updateGlobalUniversity = async (id: string, payload: any) => {
 	const university = await prisma.globalUniversity.findUnique({ where: { id } });
-	if (!university || university.isDeleted) {
+	if (!university) {
 		throw new AppError(httpStatus.NOT_FOUND, "University not found!");
+	}
+
+	// If cover image is updated or cleared, destroy the old one in Cloudinary
+	if (
+		payload.coverImageUrl !== undefined &&
+		university.coverImageUrl &&
+		payload.coverImageUrl !== university.coverImageUrl
+	) {
+		const oldPublicId = extractCloudinaryPublicId(university.coverImageUrl);
+		if (oldPublicId) {
+			cloudinary.uploader.destroy(oldPublicId, { resource_type: "image" }).catch((e) =>
+				console.error("Failed to purge old university image from Cloudinary:", e),
+			);
+		}
 	}
 
 	const updated = await prisma.globalUniversity.update({
@@ -94,12 +169,62 @@ const updateGlobalUniversity = async (id: string, payload: any) => {
 	return updated;
 };
 
+const deleteGlobalUniversity = async (id: string, hardDelete = false) => {
+	const university = await prisma.globalUniversity.findUnique({ where: { id } });
+	if (!university) {
+		throw new AppError(httpStatus.NOT_FOUND, "University not found!");
+	}
+
+	if (hardDelete) {
+		if (university.coverImageUrl) {
+			const oldPublicId = extractCloudinaryPublicId(university.coverImageUrl);
+			if (oldPublicId) {
+				cloudinary.uploader.destroy(oldPublicId, { resource_type: "image" }).catch((e) =>
+					console.error("Failed to purge university cover from Cloudinary:", e),
+				);
+			}
+		}
+		// Clean up relations first to prevent foreign key errors
+		await prisma.universityDocRequirement.deleteMany({ where: { universityId: id } });
+		await prisma.globalProgram.deleteMany({ where: { universityId: id } });
+		await prisma.globalUniversity.delete({ where: { id } });
+		return { message: "University permanently removed!" };
+	}
+
+	const updated = await prisma.globalUniversity.update({
+		where: { id },
+		data: { isDeleted: true, deletedAt: new Date() },
+	});
+	return updated;
+};
+
+const restoreGlobalUniversity = async (id: string) => {
+	const university = await prisma.globalUniversity.findUnique({ where: { id } });
+	if (!university) {
+		throw new AppError(httpStatus.NOT_FOUND, "University not found!");
+	}
+
+	const updated = await prisma.globalUniversity.update({
+		where: { id },
+		data: { isDeleted: false, deletedAt: null },
+	});
+	return updated;
+};
+
 const getGlobalUniversities = async (query: IQuery) => {
 	const page = Number(query.page) || 1;
-	const limit = Number(query.limit) || 10;
+	const limit = Number(query.limit) || 50;
 	const skip = (page - 1) * limit;
 
-	const whereConditions: any = { isDeleted: false };
+	const whereConditions: any = {};
+
+	if (query.onlyDeleted === "true") {
+		whereConditions.isDeleted = true;
+	} else if (query.includeDeleted === "true") {
+		// Include both active and deleted
+	} else {
+		whereConditions.isDeleted = false;
+	}
 
 	if (query.countryId) {
 		whereConditions.countryId = query.countryId;
@@ -126,9 +251,10 @@ const getGlobalUniversities = async (query: IQuery) => {
 			include: {
 				country: true,
 				docRequirements: true,
+				programs: { where: { isDeleted: false } },
 				_count: { select: { programs: true } },
 			},
-			orderBy: { name: "asc" },
+			orderBy: { createdAt: "desc" },
 		}),
 		prisma.globalUniversity.count({ where: whereConditions }),
 	]);
@@ -144,15 +270,49 @@ const getGlobalUniversities = async (query: IQuery) => {
 	};
 };
 
-const getGlobalUniversityDetails = async (id: string) => {
-	const university = await prisma.globalUniversity.findUnique({
-		where: { id },
-		include: {
-			country: true,
-			docRequirements: true,
-			programs: { where: { isDeleted: false } },
-		},
-	});
+const getGlobalUniversityDetails = async (idOrSlug: string) => {
+	const isUuid = /^[0-9a-fA-F-]{10,}$/.test(idOrSlug);
+	let university: any = null;
+
+	if (isUuid) {
+		university = await prisma.globalUniversity.findUnique({
+			where: { id: idOrSlug },
+			include: {
+				country: true,
+				docRequirements: true,
+				programs: { where: { isDeleted: false } },
+			},
+		});
+	}
+
+	if (!university) {
+		// Lookup by slugified university name
+		const allUniversities = await prisma.globalUniversity.findMany({
+			where: { isDeleted: false },
+			include: {
+				country: true,
+				docRequirements: true,
+				programs: { where: { isDeleted: false } },
+			},
+		});
+
+		university = allUniversities.find((u) => {
+			const slug = u.name
+				.toLowerCase()
+				.trim()
+				.replace(/\s+/g, "-")
+				.replace(/&/g, "-and-")
+				.replace(/[^\w\-]+/g, "")
+				.replace(/\-\-+/g, "-")
+				.replace(/^-+/, "")
+				.replace(/-+$/, "");
+			return (
+				slug === idOrSlug.toLowerCase() ||
+				u.id === idOrSlug ||
+				u.name.toLowerCase() === idOrSlug.toLowerCase()
+			);
+		});
+	}
 
 	if (!university || university.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "University not found!");
@@ -394,7 +554,8 @@ const getMyApplications = async (studentId: string) => {
 					university: { include: { country: true } },
 				},
 			},
-			documents: true,
+			documents: { orderBy: { createdAt: "asc" } },
+			payments: { orderBy: { createdAt: "desc" } },
 			counselor: { include: { user: true } },
 			notes: { where: { isPrivate: false }, orderBy: { createdAt: "desc" } },
 		},
@@ -451,7 +612,8 @@ const getAllApplications = async (query: IQuery, userRole: Role, userId: string)
 				student: { include: { user: true } },
 				counselor: { include: { user: true } },
 				program: { include: { university: { include: { country: true } } } },
-				documents: true,
+				documents: { orderBy: { createdAt: "asc" } },
+				payments: { orderBy: { createdAt: "desc" } },
 			},
 			orderBy: { createdAt: "desc" },
 		}),
@@ -572,6 +734,15 @@ const uploadApplicationDocument = async (
 			.end(file.buffer);
 	});
 
+	const docBefore = await prisma.applicationDocument.findUnique({
+		where: { id: documentId },
+		include: { application: { include: { student: { include: { user: true } } } } },
+	});
+
+	if (!docBefore) {
+		throw new AppError(httpStatus.NOT_FOUND, "Document item not found!");
+	}
+
 	const updated = await prisma.applicationDocument.update({
 		where: { id: documentId },
 		data: {
@@ -583,12 +754,74 @@ const uploadApplicationDocument = async (
 		},
 	});
 
+	// Trigger automated in-app Notification for Admins & Counselors
+	try {
+		const studentName = docBefore.application.student?.user?.name || "Student";
+		await prisma.notification.create({
+			data: {
+				title: `Document Uploaded: ${docBefore.title}`,
+				body: `${studentName} uploaded '${docBefore.title}' for Application #${docBefore.application.applicationNumber || docBefore.applicationId.slice(0, 8)}. Awaiting admissions review.`,
+				audience: "HIGHER_STUDY",
+				priority: "ACTION_REQUIRED",
+				actionUrl: "/admin",
+			},
+		});
+	} catch (notifErr: any) {
+		console.error("Failed to create admin notification on doc upload:", notifErr?.message);
+	}
+
+	// Trigger automated Live Chat notification
+	await sendChatSystemNotification(
+		docBefore.application.student.userId,
+		`📄 Document Submitted: Student uploaded '${docBefore.title}'. It is now under review by the Admissions Desk.`,
+		docBefore.applicationId,
+	);
+
 	return updated;
+};
+
+const sendChatSystemNotification = async (
+	studentUserId: string,
+	message: string,
+	applicationId?: string,
+	senderId?: string,
+) => {
+	try {
+		let room = await prisma.chatRoom.findFirst({
+			where: {
+				studentUserId,
+				...(applicationId ? { applicationId } : {}),
+			},
+		});
+
+		if (!room) {
+			room = await prisma.chatRoom.create({
+				data: {
+					studentUserId,
+					applicationId,
+					mode: "COLLABORATIVE_GROUP",
+				},
+			});
+		}
+
+		await prisma.chatMessage.create({
+			data: {
+				roomId: room.id,
+				senderId: senderId || studentUserId,
+				message,
+				senderDisplayName: "System Notification",
+				senderRoleBadge: "[SYSTEM]",
+			},
+		});
+	} catch (err: any) {
+		console.error("Failed to send chat system message:", err?.message);
+	}
 };
 
 const verifyDocument = async (
 	documentId: string,
 	payload: { status: DocumentStatus; adminFeedback?: string },
+	adminUserId?: string,
 ) => {
 	const doc = await prisma.applicationDocument.findUnique({
 		where: { id: documentId },
@@ -609,7 +842,24 @@ const verifyDocument = async (
 		},
 	});
 
-	if (payload.status === "REJECTED") {
+	if (payload.status === "VERIFIED") {
+		await prisma.notification.create({
+			data: {
+				userId: doc.application.student.userId,
+				title: "Document Verified & Approved",
+				body: `Your document '${doc.title}' has been verified and cleared by the Admissions Desk.`,
+				audience: "HIGHER_STUDY",
+				priority: "INFO",
+			},
+		});
+
+		await sendChatSystemNotification(
+			doc.application.student.userId,
+			`✔️ Document Verified: Admissions Desk has approved your '${doc.title}'.`,
+			doc.applicationId,
+			adminUserId,
+		);
+	} else if (payload.status === "REJECTED") {
 		await prisma.notification.create({
 			data: {
 				userId: doc.application.student.userId,
@@ -619,9 +869,407 @@ const verifyDocument = async (
 				priority: "CRITICAL_ALERT",
 			},
 		});
+
+		await sendChatSystemNotification(
+			doc.application.student.userId,
+			`⚠️ Document Action Needed: Admissions Desk requested re-upload for '${doc.title}'. Note: ${payload.adminFeedback || "Please upload a clear scanned original."}`,
+			doc.applicationId,
+			adminUserId,
+		);
 	}
 
 	return updated;
+};
+
+const addCustomDocument = async (
+	applicationId: string,
+	payload: { title: string; instruction?: string },
+	adminUserId?: string,
+) => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: { student: { include: { user: true } } },
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
+
+	const doc = await prisma.applicationDocument.create({
+		data: {
+			applicationId,
+			title: payload.title,
+			instruction: payload.instruction || "Official scanned document required for university verification.",
+			status: "REQUIRED",
+			isCustom: true,
+		},
+	});
+
+	await prisma.notification.create({
+		data: {
+			userId: app.student.userId,
+			title: `New Requirement: ${payload.title}`,
+			body: `Admissions Desk added '${payload.title}' to your checklist. Note: ${payload.instruction || "Upload requested document."}`,
+			audience: "HIGHER_STUDY",
+			priority: "ACTION_REQUIRED",
+		},
+	});
+
+	await sendChatSystemNotification(
+		app.student.userId,
+		`📋 New Document Requirement: Admissions Desk has added '${payload.title}' to your application checklist. ${payload.instruction ? `Note: ${payload.instruction}` : ""}`,
+		app.id,
+		adminUserId,
+	);
+
+	return doc;
+};
+
+const assignPresetDocuments = async (
+	applicationId: string,
+	presetType: "5_DOCS" | "7_DOCS" | "9_DOCS" | "CUSTOM",
+	customTitles?: string[],
+	adminUserId?: string,
+) => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: {
+			student: { include: { user: true } },
+			documents: true,
+		},
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
+
+	const PRESET_DEFINITIONS: Record<string, { title: string; instruction: string }[]> = {
+		"5_DOCS": [
+			{ title: "Passport Copy (Information Page)", instruction: "Upload high-quality scanned copy of valid international Passport (Mandatory)." },
+			{ title: "Academic Transcripts & Certificates", instruction: "Upload verified scanned copies of official degree/marksheets (Mandatory)." },
+			{ title: "English Language Proficiency (IELTS / PTE / MOI)", instruction: "Upload valid English language test scorecard or Medium of Instruction (MOI) certificate." },
+			{ title: "Statement of Purpose (SOP)", instruction: "Upload your personal statement detailing motivation and academic goals." },
+			{ title: "Letters of Recommendation (LOR - 2 Copies)", instruction: "Upload 2 recommendation letters from academic professors or employers." },
+		],
+		"7_DOCS": [
+			{ title: "Passport Copy (Information Page)", instruction: "Upload high-quality scanned copy of valid international Passport (Mandatory)." },
+			{ title: "Academic Transcripts & Certificates", instruction: "Upload verified scanned copies of official degree/marksheets (Mandatory)." },
+			{ title: "English Language Proficiency (IELTS / PTE / MOI)", instruction: "Upload valid English language test scorecard or Medium of Instruction (MOI) certificate." },
+			{ title: "Statement of Purpose (SOP)", instruction: "Upload your personal statement detailing motivation and academic goals." },
+			{ title: "Letters of Recommendation (LOR - 2 Copies)", instruction: "Upload 2 recommendation letters from academic professors or employers." },
+			{ title: "Bank Solvency Certificate & 6-Month Statement", instruction: "Upload official bank solvency certificate with minimum 6 months transaction history." },
+			{ title: "Police Clearance Certificate (PCC)", instruction: "Upload official police verification certificate issued within last 6 months." },
+		],
+		"9_DOCS": [
+			{ title: "Passport Copy (Information Page)", instruction: "Upload high-quality scanned copy of valid international Passport (Mandatory)." },
+			{ title: "Academic Transcripts & Certificates", instruction: "Upload verified scanned copies of official degree/marksheets (Mandatory)." },
+			{ title: "English Language Proficiency (IELTS / PTE / MOI)", instruction: "Upload valid English language test scorecard or Medium of Instruction (MOI) certificate." },
+			{ title: "Statement of Purpose (SOP)", instruction: "Upload your personal statement detailing motivation and academic goals." },
+			{ title: "Letters of Recommendation (LOR - 2 Copies)", instruction: "Upload 2 recommendation letters from academic professors or employers." },
+			{ title: "Bank Solvency Certificate & 6-Month Statement", instruction: "Upload official bank solvency certificate with minimum 6 months transaction history." },
+			{ title: "Police Clearance Certificate (PCC)", instruction: "Upload official police verification certificate issued within last 6 months." },
+			{ title: "Medical Fitness & Vaccination Certificate", instruction: "Upload certified health examination report and TB/vaccine clearance." },
+			{ title: "Updated Curriculum Vitae (CV / Resume)", instruction: "Upload detailed academic and professional resume formatted for embassy review." },
+		],
+	};
+
+	let targetList = PRESET_DEFINITIONS[presetType] || [];
+	if (presetType === "CUSTOM" && Array.isArray(customTitles)) {
+		targetList = customTitles.map((t) => ({
+			title: t,
+			instruction: "Upload requested document for admissions processing (Mandatory).",
+		}));
+	}
+
+	const existingTitles = new Set(app.documents.map((d) => d.title.toLowerCase().trim()));
+	const createdDocs = [];
+
+	for (const item of targetList) {
+		if (!existingTitles.has(item.title.toLowerCase().trim())) {
+			const newDoc = await prisma.applicationDocument.create({
+				data: {
+					applicationId,
+					title: item.title,
+					instruction: item.instruction,
+					status: "REQUIRED",
+					isCustom: true,
+				},
+			});
+			createdDocs.push(newDoc);
+			existingTitles.add(item.title.toLowerCase().trim());
+		}
+	}
+
+	const count = app.documents.length + createdDocs.length;
+
+	await prisma.notification.create({
+		data: {
+			userId: app.student.userId,
+			title: `Checklist Updated: ${count} Documents Required`,
+			body: `Admissions Desk assigned the ${presetType.replace("_", " ")} checklist (${count} items total). Please review and upload required documents.`,
+			audience: "HIGHER_STUDY",
+			priority: "ACTION_REQUIRED",
+		},
+	});
+
+	await sendChatSystemNotification(
+		app.student.userId,
+		`📋 Checklist Assigned: Admissions Desk has assigned the ${presetType.replace("_", " ")} checklist to your file (${count} total required documents). Please review and upload remaining items.`,
+		app.id,
+		adminUserId,
+	);
+
+	return prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: {
+			documents: { orderBy: { createdAt: "asc" } },
+			program: { include: { university: true } },
+		},
+	});
+};
+
+const deleteApplicationDocument = async (documentId: string) => {
+	const doc = await prisma.applicationDocument.findUnique({
+		where: { id: documentId },
+	});
+
+	if (!doc) {
+		throw new AppError(httpStatus.NOT_FOUND, "Document not found!");
+	}
+
+	await prisma.applicationDocument.delete({
+		where: { id: documentId },
+	});
+
+	return { message: "Document requirement removed successfully!" };
+};
+
+const deleteApplication = async (
+	applicationId: string,
+	userRole: Role,
+	userId: string,
+) => {
+	const application = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: { student: { include: { user: true } } },
+	});
+
+	if (!application) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
+
+	const updated = await prisma.higherStudyApplication.update({
+		where: { id: applicationId },
+		data: {
+			isDeleted: true,
+			deletedAt: new Date(),
+		},
+	});
+
+	return {
+		message: "Application moved to trash successfully",
+		data: updated,
+	};
+};
+
+const getTrashApplications = async () => {
+	const applications = await prisma.higherStudyApplication.findMany({
+		where: { isDeleted: true },
+		include: {
+			student: { include: { user: true } },
+			counselor: { include: { user: true } },
+			program: { include: { university: { include: { country: true } } } },
+			documents: { orderBy: { createdAt: "asc" } },
+			payments: { orderBy: { createdAt: "desc" } },
+		},
+		orderBy: { deletedAt: "desc" },
+	});
+
+	const enriched = applications.map((app) => {
+		const deletedDate = app.deletedAt ? new Date(app.deletedAt) : new Date(app.updatedAt);
+		const daysElapsed = Math.floor((Date.now() - deletedDate.getTime()) / (1000 * 60 * 60 * 24));
+		const daysRemaining = Math.max(0, 30 - daysElapsed);
+		return {
+			...app,
+			daysElapsed,
+			daysRemaining,
+		};
+	});
+
+	return enriched;
+};
+
+const restoreApplication = async (applicationId: string) => {
+	const application = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+	});
+
+	if (!application) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
+
+	const restored = await prisma.higherStudyApplication.update({
+		where: { id: applicationId },
+		data: {
+			isDeleted: false,
+			deletedAt: null,
+		},
+	});
+
+	return {
+		message: "Application restored from trash successfully",
+		data: restored,
+	};
+};
+
+const permanentDeleteApplication = async (applicationId: string) => {
+	const application = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: { documents: true },
+	});
+
+	if (!application) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
+
+	for (const doc of application.documents) {
+		if (doc.filePublicId) {
+			try {
+				await cloudinary.uploader.destroy(doc.filePublicId, { resource_type: "raw" });
+			} catch (e) {
+				console.warn("Could not destroy Cloudinary doc:", e);
+			}
+		}
+	}
+
+	if (application.offerLetterPublicId) {
+		try {
+			await cloudinary.uploader.destroy(application.offerLetterPublicId, { resource_type: "raw" });
+		} catch (e) {
+			console.warn("Could not destroy Cloudinary offer letter:", e);
+		}
+	}
+
+	await prisma.applicationDocument.deleteMany({ where: { applicationId } });
+	await prisma.counselorNote.deleteMany({ where: { applicationId } });
+	await prisma.payment.deleteMany({ where: { higherStudyApplicationId: applicationId } });
+	await prisma.higherStudyApplication.delete({ where: { id: applicationId } });
+
+	return { message: "Application permanently purged from database." };
+};
+
+const emptyTrashApplications = async () => {
+	const deletedApps = await prisma.higherStudyApplication.findMany({
+		where: { isDeleted: true },
+		include: { documents: true },
+	});
+
+	for (const app of deletedApps) {
+		for (const doc of app.documents) {
+			if (doc.filePublicId) {
+				try {
+					await cloudinary.uploader.destroy(doc.filePublicId, { resource_type: "raw" });
+				} catch (e) {}
+			}
+		}
+		if (app.offerLetterPublicId) {
+			try {
+				await cloudinary.uploader.destroy(app.offerLetterPublicId, { resource_type: "raw" });
+			} catch (e) {}
+		}
+
+		await prisma.applicationDocument.deleteMany({ where: { applicationId: app.id } });
+		await prisma.counselorNote.deleteMany({ where: { applicationId: app.id } });
+		await prisma.payment.deleteMany({ where: { higherStudyApplicationId: app.id } });
+		await prisma.higherStudyApplication.delete({ where: { id: app.id } });
+	}
+
+	return {
+		message: `Successfully emptied trash (${deletedApps.length} applications permanently purged).`,
+		count: deletedApps.length,
+	};
+};
+
+const applyPresetToApplication = async (
+	applicationId: string,
+	payload: {
+		presetId?: string;
+		items?: Array<{ title: string; instruction?: string; isRequired?: boolean }>;
+	},
+	adminUserId?: string,
+) => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: {
+			student: { include: { user: true } },
+			documents: true,
+		},
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
+
+	let targetItems: Array<{ title: string; instruction?: string; isRequired?: boolean }> = [];
+	let presetTitle = "Checklist Bundle";
+
+	if (payload.presetId) {
+		const preset = await ChecklistPresetService.getPresetById(payload.presetId);
+		targetItems = preset.items;
+		presetTitle = preset.title;
+	} else if (Array.isArray(payload.items) && payload.items.length > 0) {
+		targetItems = payload.items;
+	}
+
+	if (targetItems.length === 0) {
+		throw new AppError(httpStatus.BAD_REQUEST, "No document checklist items provided to assign!");
+	}
+
+	const existingTitles = new Set(app.documents.map((d) => d.title.toLowerCase().trim()));
+	const createdDocs = [];
+
+	for (const item of targetItems) {
+		if (!existingTitles.has(item.title.toLowerCase().trim())) {
+			const newDoc = await prisma.applicationDocument.create({
+				data: {
+					applicationId,
+					title: item.title,
+					instruction: item.instruction || "Official scanned document required for university verification.",
+					status: "REQUIRED",
+					isCustom: true,
+				},
+			});
+			createdDocs.push(newDoc);
+			existingTitles.add(item.title.toLowerCase().trim());
+		}
+	}
+
+	const totalCount = app.documents.length + createdDocs.length;
+
+	await prisma.notification.create({
+		data: {
+			userId: app.student.userId,
+			title: `Checklist Updated: ${createdDocs.length} Requirements Added`,
+			body: `Admissions Desk assigned '${presetTitle}' (${totalCount} total documents). Please upload required documents.`,
+			audience: "HIGHER_STUDY",
+			priority: "ACTION_REQUIRED",
+		},
+	});
+
+	await sendChatSystemNotification(
+		app.student.userId,
+		`📋 Checklist Assigned: Admissions Desk has assigned '${presetTitle}' to your application (${createdDocs.length} new items added, ${totalCount} total required). Please review and upload remaining documents.`,
+		app.id,
+		adminUserId,
+	);
+
+	return prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: {
+			documents: { orderBy: { createdAt: "asc" } },
+			program: { include: { university: true } },
+		},
+	});
 };
 
 const updateApplicationStage = async (
@@ -883,11 +1531,351 @@ const deleteBlogPost = async (id: string) => {
 	return { message: "Blog post deleted successfully!" };
 };
 
+const getApplicationById = async (id: string) => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id },
+		include: {
+			student: { include: { user: true } },
+			counselor: { include: { user: true } },
+			program: { include: { university: { include: { country: true } } } },
+			documents: { orderBy: { createdAt: "asc" } },
+			payments: { orderBy: { createdAt: "desc" } },
+			notes: { orderBy: { createdAt: "desc" } },
+			internalNotes: { orderBy: { createdAt: "asc" } },
+		},
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application dossier not found!");
+	}
+
+	return app;
+};
+
+const updateApplicationInformation = async (
+	applicationId: string,
+	payload: {
+		customInformation?: any;
+		appliedUniversities?: any;
+		contactNumber?: string;
+		address?: string;
+	},
+) => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: { student: true },
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application record not found!");
+	}
+
+	const updateData: any = {};
+	if (payload.customInformation !== undefined) {
+		updateData.customInformation = payload.customInformation;
+	}
+	if (payload.appliedUniversities !== undefined) {
+		updateData.appliedUniversities = payload.appliedUniversities;
+	}
+
+	if (payload.contactNumber !== undefined || payload.address !== undefined) {
+		await prisma.student.update({
+			where: { id: app.studentId },
+			data: {
+				...(payload.contactNumber !== undefined ? { contactNumber: payload.contactNumber } : {}),
+				...(payload.address !== undefined ? { address: payload.address } : {}),
+			},
+		});
+		if (payload.contactNumber !== undefined) {
+			await prisma.user.update({
+				where: { id: app.student.userId },
+				data: { contactNumber: payload.contactNumber },
+			});
+		}
+	}
+
+	const updated = await prisma.higherStudyApplication.update({
+		where: { id: applicationId },
+		data: updateData,
+		include: {
+			student: { include: { user: true } },
+			counselor: { include: { user: true } },
+			program: { include: { university: { include: { country: true } } } },
+			documents: { orderBy: { createdAt: "asc" } },
+			payments: { orderBy: { createdAt: "desc" } },
+			notes: { orderBy: { createdAt: "desc" } },
+			internalNotes: { orderBy: { createdAt: "asc" } },
+		},
+	});
+
+	return updated;
+};
+
+const updateApplicationTracking = async (
+	applicationId: string,
+	payload: { trackingMilestones: any; notifyStudent?: boolean; updateMessage?: string },
+) => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: { student: { include: { user: true } } },
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application record not found!");
+	}
+
+	const updated = await prisma.higherStudyApplication.update({
+		where: { id: applicationId },
+		data: { trackingMilestones: payload.trackingMilestones },
+		include: {
+			student: { include: { user: true } },
+			counselor: { include: { user: true } },
+			program: { include: { university: { include: { country: true } } } },
+			documents: { orderBy: { createdAt: "asc" } },
+			payments: { orderBy: { createdAt: "desc" } },
+			notes: { orderBy: { createdAt: "desc" } },
+			internalNotes: { orderBy: { createdAt: "asc" } },
+		},
+	});
+
+	if (payload.notifyStudent && app.student?.user?.id) {
+		await prisma.notification.create({
+			data: {
+				userId: app.student.user.id,
+				title: "Admission Tracking Updated",
+				body: payload.updateMessage || "Your higher study admission tracking has been updated.",
+				audience: "HIGHER_STUDY",
+				priority: "INFO",
+			},
+		});
+	}
+
+	return updated;
+};
+
+const addApplicationInternalNote = async (
+	applicationId: string,
+	userId: string,
+	payload: { note: string },
+) => {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+	});
+
+	if (!user) {
+		throw new AppError(httpStatus.NOT_FOUND, "User profile not found!");
+	}
+
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: { student: { include: { user: true } } },
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application record not found!");
+	}
+
+	const internalNote = await prisma.applicationInternalNote.create({
+		data: {
+			applicationId,
+			note: payload.note,
+			authorId: user.id,
+			authorName: user.name,
+			authorRole: user.role,
+			authorAvatar: user.imageUrl || null,
+		},
+	});
+
+	// Notify other Admins & Super Admins
+	try {
+		const otherAdmins = await prisma.user.findMany({
+			where: {
+				role: { in: ["SUPER_ADMIN", "ADMIN"] },
+				id: { not: user.id },
+				isDeleted: false,
+			},
+			select: { id: true },
+		});
+
+		const studentName = app.student?.user?.name || "Student";
+		for (const admin of otherAdmins) {
+			await prisma.notification.create({
+				data: {
+					userId: admin.id,
+					title: `Internal Note: ${studentName}`,
+					body: `${user.name} posted: "${payload.note.slice(0, 80)}${payload.note.length > 80 ? "..." : ""}"`,
+					audience: "HIGHER_STUDY",
+					priority: "INFO",
+				},
+			});
+		}
+	} catch (nErr) {
+		console.error("Failed to notify admins of internal note", nErr);
+	}
+
+	return internalNote;
+};
+
+const deleteApplicationInternalNote = async (
+	applicationId: string,
+	noteId: string,
+) => {
+	await prisma.applicationInternalNote.delete({
+		where: { id: noteId },
+	});
+	return { message: "Internal note deleted successfully!" };
+};
+
+const generateApplicationDossierPDF = async (
+	applicationId: string,
+	options: { documentIds?: string[]; customTitle?: string } = {},
+): Promise<{ buffer: Buffer; fileName: string }> => {
+	const app = await prisma.higherStudyApplication.findUnique({
+		where: { id: applicationId },
+		include: {
+			student: { include: { user: true } },
+			program: { include: { university: { include: { country: true } } } },
+			documents: true,
+		},
+	});
+
+	if (!app) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application record not found!");
+	}
+
+	// Order documents by requested documentIds if provided
+	let docs = app.documents;
+	if (Array.isArray(options.documentIds) && options.documentIds.length > 0) {
+		const orderMap = new Map(options.documentIds.map((id, idx) => [id, idx]));
+		docs = [...docs].sort((a, b) => {
+			const aIdx = orderMap.has(a.id) ? (orderMap.get(a.id) as number) : 999;
+			const bIdx = orderMap.has(b.id) ? (orderMap.get(b.id) as number) : 999;
+			return aIdx - bIdx;
+		});
+	}
+
+	// Include only documents that actually have an uploaded file
+	const uploadedDocs = docs.filter((d) => Boolean(d.fileUrl));
+
+	const studentName = app.student?.user?.name || (app.student as any)?.name || "Student";
+	const safeStudentName = studentName.replace(/[^a-zA-Z0-9_-]/g, "_");
+	const fileName = options.customTitle?.trim()
+		? `${options.customTitle.trim().replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`
+		: `${safeStudentName}_All_Documents.pdf`;
+
+	const mergedPdf = await PDFLibDoc.create();
+
+	for (const d of uploadedDocs) {
+		if (!d.fileUrl) continue;
+
+		try {
+			const res = await fetch(d.fileUrl);
+			if (!res.ok) continue;
+			const arrayBuffer = await res.arrayBuffer();
+			const fileBuffer = Buffer.from(arrayBuffer);
+
+			// Check if the uploaded file is already a PDF
+			const isPdf =
+				d.fileUrl.toLowerCase().endsWith(".pdf") ||
+				(res.headers.get("content-type") || "").includes("pdf") ||
+				fileBuffer.subarray(0, 4).toString() === "%PDF";
+
+			if (isPdf) {
+				try {
+					const srcPdf = await PDFLibDoc.load(fileBuffer, { ignoreEncryption: true });
+					const pageIndices = srcPdf.getPageIndices();
+					const copiedPages = await mergedPdf.copyPages(srcPdf, pageIndices);
+					for (const page of copiedPages) {
+						mergedPdf.addPage(page);
+					}
+					continue;
+				} catch (pdfErr) {
+					console.error(`Failed to load external PDF for doc ${d.id}:`, pdfErr);
+				}
+			}
+
+			// Embed image (JPG or PNG)
+			let embeddedImage: any = null;
+			const isPng =
+				d.fileUrl.toLowerCase().includes(".png") ||
+				fileBuffer.subarray(0, 8).toString("hex") === "89504e470d0a1a0a";
+
+			try {
+				if (isPng) {
+					embeddedImage = await mergedPdf.embedPng(fileBuffer);
+				} else {
+					embeddedImage = await mergedPdf.embedJpg(fileBuffer);
+				}
+			} catch (e1) {
+				try {
+					embeddedImage = await mergedPdf.embedPng(fileBuffer);
+				} catch (e2) {
+					try {
+						embeddedImage = await mergedPdf.embedJpg(fileBuffer);
+					} catch (e3) {
+						console.error(`Could not embed image format for doc ${d.id}:`, e3);
+					}
+				}
+			}
+
+			if (embeddedImage) {
+				const imgWidth = embeddedImage.width;
+				const imgHeight = embeddedImage.height;
+
+				const margin = 24;
+				const baseWidth = 595.28; // Standard A4 width (pt)
+
+				// Calculate target width & height keeping exact aspect ratio
+				let targetWidth = baseWidth - margin * 2;
+				let targetHeight = targetWidth * (imgHeight / imgWidth);
+
+				let finalPageWidth = baseWidth;
+				let finalPageHeight = targetHeight + margin * 2;
+
+				// If it's a tall portrait image exceeding A4 max height (841.89 pt)
+				if (finalPageHeight > 841.89) {
+					finalPageHeight = 841.89;
+					const maxContentHeight = finalPageHeight - margin * 2;
+					targetWidth = maxContentHeight * (imgWidth / imgHeight);
+					targetHeight = maxContentHeight;
+					finalPageWidth = Math.max(baseWidth, targetWidth + margin * 2);
+				}
+
+				// Add page tailored cleanly to the image (no massive top/bottom empty space)
+				const page = mergedPdf.addPage([finalPageWidth, finalPageHeight]);
+				const x = (finalPageWidth - targetWidth) / 2;
+				const y = (finalPageHeight - targetHeight) / 2;
+
+				page.drawImage(embeddedImage, {
+					x,
+					y,
+					width: targetWidth,
+					height: targetHeight,
+				});
+			}
+		} catch (err) {
+			console.error(`Failed processing document ${d.id} for dossier:`, err);
+		}
+	}
+
+	// Fallback page if no documents were processed
+	if (mergedPdf.getPageCount() === 0) {
+		mergedPdf.addPage([595.28, 841.89]);
+	}
+
+	const pdfBytes = await mergedPdf.save();
+	const buffer = Buffer.from(pdfBytes);
+
+	return { buffer, fileName };
+};
+
 export const HigherStudyService = {
 	createCountry,
 	getCountries,
 	createGlobalUniversity,
 	updateGlobalUniversity,
+	deleteGlobalUniversity,
+	restoreGlobalUniversity,
 	getGlobalUniversities,
 	getGlobalUniversityDetails,
 	addUniversityDocRequirement,
@@ -898,10 +1886,14 @@ export const HigherStudyService = {
 	applyForProgram,
 	getMyApplications,
 	getAllApplications,
+	getApplicationById,
 	assignCounselor,
 	addCounselorNote,
 	uploadApplicationDocument,
 	verifyDocument,
+	addCustomDocument,
+	assignPresetDocuments,
+	deleteApplicationDocument,
 	updateApplicationStage,
 	issueOfferLetter,
 	getOfferLetterDownload,
@@ -910,4 +1902,17 @@ export const HigherStudyService = {
 	getBlogPosts,
 	getBlogPostBySlug,
 	deleteBlogPost,
+	uploadUniversityCover,
+	deleteUniversityImage,
+	deleteApplication,
+	getTrashApplications,
+	restoreApplication,
+	permanentDeleteApplication,
+	emptyTrashApplications,
+	applyPresetToApplication,
+	generateApplicationDossierPDF,
+	updateApplicationInformation,
+	updateApplicationTracking,
+	addApplicationInternalNote,
+	deleteApplicationInternalNote,
 };

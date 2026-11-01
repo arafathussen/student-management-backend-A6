@@ -50,15 +50,80 @@ const downloadPaymentReceiptPDF = catchAsync(
 		res.setHeader("Content-Type", "application/pdf");
 		res.setHeader(
 			"Content-Disposition",
-			`attachment; filename="receipt_${paymentId}.pdf"`,
+			`inline; filename="receipt_${paymentId}.pdf"`,
 		);
-		res.send(pdfBuffer);
+		res.setHeader("Content-Length", pdfBuffer.length);
+		res.end(pdfBuffer);
+	},
+);
+
+const verifyCheckoutSession = catchAsync(async (req: Request, res: Response) => {
+	const { sessionId, paymentId } = req.body;
+	const result = await PaymentService.verifyCheckoutSession(
+		sessionId,
+		paymentId,
+	);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Stripe payment verified successfully!",
+		data: result,
+	});
+});
+
+const createApplicationInvoice = catchAsync(
+	async (req: Request, res: Response) => {
+		const adminUserId = req.user?.userId;
+		const result = await PaymentService.createApplicationInvoice(
+			req.body,
+			adminUserId,
+		);
+
+		sendResponse(res, {
+			statusCode: httpStatus.CREATED,
+			success: true,
+			message: "Invoice created and notified successfully!",
+			data: result,
+		});
+	},
+);
+
+const deletePendingInvoice = catchAsync(
+	async (req: Request, res: Response) => {
+		const paymentId = req.params.id as string;
+		const result = await PaymentService.deletePendingInvoice(paymentId);
+
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: result.message,
+			data: null,
+		});
+	},
+);
+
+const updatePendingInvoice = catchAsync(
+	async (req: Request, res: Response) => {
+		const paymentId = req.params.id as string;
+		const result = await PaymentService.updatePendingInvoice(paymentId, req.body);
+
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Invoice updated successfully!",
+			data: result,
+		});
 	},
 );
 
 export const PaymentController = {
 	createCheckoutSession,
 	handleStripeWebhook,
+	verifyCheckoutSession,
 	getMyPaymentHistory,
 	downloadPaymentReceiptPDF,
+	createApplicationInvoice,
+	deletePendingInvoice,
+	updatePendingInvoice,
 };

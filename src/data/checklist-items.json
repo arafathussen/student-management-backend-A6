@@ -1,0 +1,50 @@
+[
+  {
+    "id": "item_passport",
+    "title": "Upload your Passport",
+    "instruction": "Upload high-quality color scanned copy of first & last page of valid passport.",
+    "isRequired": true,
+    "category": "Identity",
+    "createdAt": "2026-10-24T16:36:44.357Z"
+  },
+  {
+    "id": "item_transcripts",
+    "title": "Academic Transcripts & Certificates",
+    "instruction": "Upload official verified scanned copies of academic degree certificates and all marksheets.",
+    "isRequired": true,
+    "category": "Academic",
+    "createdAt": "2026-10-24T16:36:44.357Z"
+  },
+  {
+    "id": "item_english",
+    "title": "English Language Proficiency (IELTS / PTE / MOI)",
+    "instruction": "Upload valid official score report (IELTS/PTE/TOEFL) or English Medium of Instruction certificate.",
+    "isRequired": true,
+    "category": "Academic",
+    "createdAt": "2026-10-24T16:36:44.357Z"
+  },
+  {
+    "id": "item_sop",
+    "title": "Statement of Purpose (SOP)",
+    "instruction": "Upload detailed personal statement explaining academic motivation, university selection, and career goals.",
+    "isRequired": true,
+    "category": "Academic",
+    "createdAt": "2026-10-24T16:36:44.357Z"
+  },
+  {
+    "id": "item_lor",
+    "title": "Letters of Recommendation (LOR - 2 Copies)",
+    "instruction": "Upload 2 signed recommendation letters from university professors or current employer.",
+    "isRequired": true,
+    "category": "Academic",
+    "createdAt": "2026-10-24T16:36:44.357Z"
+  },
+  {
+    "id": "item_financial",
+    "title": "Bank Statement & Financial Solvency",
+    "instruction": "Upload 6-month certified bank statement accompanied by official solvency certificate from bank.",
+    "isRequired": true,
+    "category": "Financial",
+    "createdAt": "2026-10-24T16:36:44.357Z"
+  }
+]

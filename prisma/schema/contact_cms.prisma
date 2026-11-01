@@ -1,0 +1,79 @@
+model ContactPageSetting {
+  id                  String   @id @default(uuid(7))
+  headquartersTitle   String   @default("Dhaka Headquarters")
+  headquartersAddress String   @default("Level 6, Navana Tower, Gulshan-1, Dhaka-1212, Bangladesh.")
+  headquartersNote    String   @default("Direct access via Gulshan Circle 1")
+  officeHoursTitle            String   @default("Office Hours & Counseling")
+  officeHoursSchedule         String   @default("Saturday – Thursday: 10:00 AM – 7:00 PM")
+  officeHoursNote             String   @default("Friday: Closed (Hotline & WhatsApp Active)")
+  // Auto-Responder Email Template Settings
+  autoResponderSubject        String   @default("We Have Received Your Inquiry — Rise Abroad Education")
+  autoResponderSenderName     String   @default("Rise Abroad Admissions Desk")
+  autoResponderSenderEmail    String   @default("admissions@riseabroad.com")
+  autoResponderWhatsAppText   String   @default("জরুরি কোনো তথ্যের প্রয়োজন হলে অথবা ২৪ ঘণ্টার মধ্যে যোগাযোগ পেতে বিলম্ব হলে, আপনি সরাসরি আমাদের অফিসিয়াল হোয়াটসঅ্যাপে নক দিতে পারেন:")
+  autoResponderWhatsAppNumber String   @default("+880 1712-345678")
+  autoResponderOfficeAddress  String   @default("Rise Abroad Education • Level 6, Navana Tower, Gulshan-1, Dhaka")
+  autoResponderHotline        String   @default("+880 1712-345678")
+  autoResponderEmail          String   @default("admissions@riseabroad.com")
+  autoResponderHours          String   @default("Counseling Desk: Sat – Thu (10AM – 7PM)")
+  autoResponderLogoUrl        String?  @default("")
+  // Password Reset OTP Email Template Settings
+  otpEmailSubject             String   @default("Your Password Reset Code — Rise Abroad Education")
+  otpEmailHeading             String   @default("Password Reset Verification Code")
+  otpEmailBodyMessage         String   @default("We received a request to reset the password for your Rise Abroad Education account. Use the verification code below to proceed with resetting your password:")
+  otpEmailExpiryNote          String   @default("This code expires in 10 minutes. For your security, do not share this code with anyone.")
+  // New Registration Account Verification OTP Email Settings
+  regOtpEmailSubject          String   @default("Account Verification Code — Rise Abroad Education")
+  regOtpEmailHeading          String   @default("Verify Your Student Account")
+  regOtpEmailBodyMessage      String   @default("Thank you for registering with Rise Abroad Education. Please use the following 6-digit verification code to activate and verify your student account:")
+  regOtpEmailExpiryNote       String   @default("This code is valid for 10 minutes. For your security, do not share this code with anyone.")
+  // Welcome Registration Email Template Settings
+  welcomeEmailSubject         String   @default("Welcome to Rise Abroad Education — Your Journey Begins!")
+  welcomeEmailHeading         String   @default("Welcome to Rise Abroad Education")
+  welcomeEmailMessage         String   @default("Thank you for registering with Rise Abroad Education. Your global higher education journey starts here! Our certified counselors and admissions desk are here to guide you to your dream university.")
+  welcomeEmailBtnText         String   @default("Access Student Portal")
+  welcomeEmailBtnUrl          String   @default("https://riseabroad.com/dashboard")
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@map("contact_page_settings")
+}
+
+model SupportTeamMember {
+  id         String   @id @default(uuid(7))
+  name       String
+  role       String
+  badge      String   @default("SUPPORT")
+  badgeColor String   @default("bg-blue-500/10 text-blue-400 border-blue-500/30")
+  department String
+  avatar     String
+  avatarAlt  String?
+  phone      String
+  email      String
+  whatsapp   String
+  facebook   String
+  order      Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("support_team_members")
+}
+
+model ContactInquiry {
+  id        String    @id @default(uuid(7))
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String    @db.Text
+  country   String?   @default("Bangladesh")
+  isRead    Boolean   @default(false)
+  status    String    @default("UNREAD")
+  reply     String?   @db.Text
+  repliedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("contact_inquiries")
+}

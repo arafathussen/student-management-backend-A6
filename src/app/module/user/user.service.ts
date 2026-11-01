@@ -13,8 +13,9 @@ import { AppError } from "../../utils/AppError";
 import { sendPasswordResetOtpEmail } from "../../utils/emailHelper";
 
 const getMe = async (userId: string) => {
-	const user = await prisma.user.findUnique({
+	const user = await prisma.user.update({
 		where: { id: userId },
+		data: { updatedAt: new Date() },
 		include: {
 			student: true,
 			counselor: true,
@@ -39,10 +40,14 @@ const updateMe = async (userId: string, payload: any) => {
 	}
 
 	const result = await prisma.$transaction(async (tx) => {
-		if (payload.name) {
+		const userUpdateData: any = {};
+		if (payload.name) userUpdateData.name = payload.name;
+		if (payload.contactNumber !== undefined) userUpdateData.contactNumber = payload.contactNumber;
+
+		if (Object.keys(userUpdateData).length > 0) {
 			await tx.user.update({
 				where: { id: userId },
-				data: { name: payload.name },
+				data: userUpdateData,
 			});
 		}
 
@@ -381,7 +386,14 @@ const deleteUser = async (requesterRole: Role, userId: string) => {
 		}
 	}
 
-	await prisma.user.delete({ where: { id: userId } });
+	await prisma.user.update({
+		where: { id: userId },
+		data: {
+			isDeleted: true,
+			status: "DELETED",
+			deletedAt: new Date(),
+		},
+	});
 
 	return { message: "User deleted successfully!" };
 };
@@ -419,23 +431,85 @@ const updateUserStatus = async (
 	return updated;
 };
 
-// 8. Get All Users with filters
+// 8. Update User Role (Promote/Demote - Only Super Admin)
+const updateUserRole = async (
+	requesterRole: Role,
+	userId: string,
+	newRole: Role,
+) => {
+	if (requesterRole !== "SUPER_ADMIN") {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Only Super Admin can change user roles!",
+		);
+	}
+
+	const targetUser = await prisma.user.findUnique({
+		where: { id: userId },
+		include: { student: true, counselor: true },
+	});
+
+	if (!targetUser) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found!");
+	}
+
+	if (targetUser.role === "SUPER_ADMIN") {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Cannot modify role of Super Admin!",
+		);
+	}
+
+	// If moving to STUDENT and no student profile exists, create one
+	if (newRole === "STUDENT" && !targetUser.student) {
+		await prisma.student.create({
+			data: {
+				userId: targetUser.id,
+				studentId: `STU-${Date.now().toString().slice(-4)}`,
+			},
+		});
+	}
+
+	// If moving to COUNSELOR and no counselor profile exists, create one
+	if (newRole === "COUNSELOR" && !targetUser.counselor) {
+		await prisma.counselor.create({
+			data: {
+				userId: targetUser.id,
+				counselorId: `CNS-${Date.now().toString().slice(-4)}`,
+			},
+		});
+	}
+
+	const updated = await prisma.user.update({
+		where: { id: userId },
+		data: { role: newRole },
+		include: { student: true, counselor: true },
+	});
+
+	return updated;
+};
+
+// 9. Get All Users with filters
 const getAllUsers = async (query: IQuery, requesterRole: Role) => {
 	const page = Number(query.page) || 1;
-	const limit = Number(query.limit) || 10;
+	const limit = Number(query.limit) || 100;
 	const skip = (page - 1) * limit;
-	const sortBy = query.sortBy || "createdAt";
+	const sortBy = query.sortBy || "updatedAt";
 	const sortOrder = query.sortOrder || "desc";
 
 	const whereConditions: any = {
 		isDeleted: false,
 	};
 
-	// Normal Admin cannot see other Admins unless Super Admin
+	// Normal Admin cannot see Super Admin, but can see how many other Admins, Counselors & Students exist
 	if (requesterRole === "ADMIN") {
-		whereConditions.role = {
-			in: ["COUNSELOR", "STUDENT"],
-		};
+		if (query.role && query.role !== "SUPER_ADMIN") {
+			whereConditions.role = query.role as Role;
+		} else {
+			whereConditions.role = {
+				not: "SUPER_ADMIN",
+			};
+		}
 	} else if (query.role) {
 		whereConditions.role = query.role as Role;
 	}
@@ -484,5 +558,6 @@ export const UserService = {
 	adminResetUserPassword,
 	deleteUser,
 	updateUserStatus,
+	updateUserRole,
 	getAllUsers,
 };

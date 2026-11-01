@@ -19,10 +19,31 @@ router.post(
 	checkAuth("SUPER_ADMIN", "ADMIN"),
 	HigherStudyController.createGlobalUniversity,
 );
+router.post(
+	"/universities/upload-cover",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	upload.single("image"),
+	HigherStudyController.uploadUniversityCover,
+);
+router.delete(
+	"/universities/delete-image",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.deleteUniversityImage,
+);
 router.patch(
 	"/universities/:id",
 	checkAuth("SUPER_ADMIN", "ADMIN"),
 	HigherStudyController.updateGlobalUniversity,
+);
+router.delete(
+	"/universities/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.deleteGlobalUniversity,
+);
+router.patch(
+	"/universities/:id/restore",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.restoreGlobalUniversity,
 );
 router.get("/universities", HigherStudyController.getGlobalUniversities);
 router.get(
@@ -75,6 +96,111 @@ router.get(
 	HigherStudyController.getAllApplications,
 );
 
+// Applications Trash & Deletion
+router.get(
+	"/applications/trash",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.getTrashApplications,
+);
+
+router.delete(
+	"/applications/trash/empty",
+	checkAuth("SUPER_ADMIN"),
+	HigherStudyController.emptyTrashApplications,
+);
+
+router.patch(
+	"/applications/:id/restore",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.restoreApplication,
+);
+
+router.delete(
+	"/applications/:id/permanent",
+	checkAuth("SUPER_ADMIN"),
+	HigherStudyController.permanentDeleteApplication,
+);
+
+router.delete(
+	"/applications/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.deleteApplication,
+);
+
+router.get(
+	"/applications/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR", "STUDENT"),
+	HigherStudyController.getApplicationById,
+);
+
+router.post(
+	"/applications/:applicationId/download-dossier-pdf",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR", "STUDENT"),
+	HigherStudyController.downloadApplicationDossierPDF,
+);
+
+router.get(
+	"/applications/:applicationId/download-dossier-pdf",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR", "STUDENT"),
+	HigherStudyController.downloadApplicationDossierPDF,
+);
+
+// Checklist Presets Management
+router.get(
+	"/checklist-presets",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.getChecklistPresets,
+);
+
+router.post(
+	"/checklist-presets",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.createChecklistPreset,
+);
+
+router.put(
+	"/checklist-presets/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.updateChecklistPreset,
+);
+
+router.delete(
+	"/checklist-presets/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.deleteChecklistPreset,
+);
+
+// Individual Checklist Items Management
+router.get(
+	"/checklist-items",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.getChecklistItems,
+);
+
+router.post(
+	"/checklist-items",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.createChecklistItem,
+);
+
+router.put(
+	"/checklist-items/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.updateChecklistItem,
+);
+
+router.delete(
+	"/checklist-items/:id",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.deleteChecklistItem,
+);
+
+router.post(
+	"/applications/:applicationId/apply-preset",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.applyPresetToApplication,
+);
+
 router.patch(
 	"/applications/:applicationId/assign-counselor",
 	checkAuth("SUPER_ADMIN", "ADMIN"),
@@ -85,6 +211,30 @@ router.post(
 	"/applications/:applicationId/notes",
 	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
 	HigherStudyController.addCounselorNote,
+);
+
+router.patch(
+	"/applications/:id/information",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.updateApplicationInformation,
+);
+
+router.patch(
+	"/applications/:id/tracking",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.updateApplicationTracking,
+);
+
+router.post(
+	"/applications/:id/internal-notes",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.addApplicationInternalNote,
+);
+
+router.delete(
+	"/applications/:id/internal-notes/:noteId",
+	checkAuth("SUPER_ADMIN", "ADMIN"),
+	HigherStudyController.deleteApplicationInternalNote,
 );
 
 router.post(
@@ -99,6 +249,24 @@ router.patch(
 	"/documents/:documentId/verify",
 	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
 	HigherStudyController.verifyDocument,
+);
+
+router.post(
+	"/applications/:applicationId/documents",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.addCustomDocument,
+);
+
+router.post(
+	"/applications/:applicationId/assign-presets",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.assignPresetDocuments,
+);
+
+router.delete(
+	"/documents/:documentId",
+	checkAuth("SUPER_ADMIN", "ADMIN", "COUNSELOR"),
+	HigherStudyController.deleteApplicationDocument,
 );
 
 router.patch(

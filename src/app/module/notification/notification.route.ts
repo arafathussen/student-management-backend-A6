@@ -17,6 +17,12 @@ router.get(
 );
 
 router.patch(
+	"/mark-all-read",
+	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR", "STUDENT"),
+	NotificationController.markAllNotificationsAsRead,
+);
+
+router.patch(
 	"/:id/read",
 	checkAuth("ADMIN", "SUPER_ADMIN", "COUNSELOR", "STUDENT"),
 	NotificationController.markNotificationAsRead,

@@ -23,6 +23,8 @@ import { NotificationRoutes } from "./app/module/notification/notification.route
 import { PaymentRoutes } from "./app/module/payment/payment.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { CommissionRoutes } from "./app/module/commission/commission.route";
+import { SuccessStoryRoutes } from "./app/module/success-story/success-story.route";
+import { ContactRoutes } from "./app/module/contact/contact.route";
 
 const app: Application = express();
 
@@ -39,10 +41,19 @@ app.use(
 	}),
 );
 
-// Rate Limiting
+// Rate Limiting (skipped in development and for localhost)
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 200, // Limit each IP to 200 requests per window
+	max: process.env.NODE_ENV === "production" ? 1000 : 50000,
+	skip: (req) => {
+		const ip = req.ip || req.socket.remoteAddress || "";
+		return (
+			process.env.NODE_ENV !== "production" ||
+			ip.includes("127.0.0.1") ||
+			ip.includes("::1") ||
+			ip.includes("localhost")
+		);
+	},
 	message: {
 		success: false,
 		message:
@@ -60,7 +71,7 @@ app.use(cookieParser());
 app.get("/", (req: Request, res: Response) => {
 	res.status(httpStatus.OK).json({
 		success: true,
-		message: "University & Global Higher Study Management API is operational.",
+		message: "Rise Abroad Education Management API is operational.",
 		version: "1.0.0",
 	});
 });
@@ -69,7 +80,7 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/api/v1", (req: Request, res: Response) => {
 	res.status(httpStatus.OK).json({
 		success: true,
-		message: "API v1 service is operational.",
+		message: "Rise Abroad Education API v1 service is operational.",
 		version: "1.0.0",
 	});
 });
@@ -87,6 +98,8 @@ app.use("/api/v1/chat", ChatRoutes);
 app.use("/api/v1/notifications", NotificationRoutes);
 app.use("/api/v1/admin", AdminRoutes);
 app.use("/api/v1/commissions", CommissionRoutes);
+app.use("/api/v1/success-stories", SuccessStoryRoutes);
+app.use("/api/v1/contact", ContactRoutes);
 
 // Error Handlers
 app.use(globalErrorHandler);

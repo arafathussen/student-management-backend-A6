@@ -214,6 +214,68 @@ export const seedInitialData = async () => {
 			});
 		}
 
+		// 7. Seed Student Success Stories
+		const isStoryExist = await prisma.studentSuccessStory.findFirst();
+		if (!isStoryExist && superAdminUser) {
+			const successStories = [
+				{
+					studentName: "Arafat Hussen",
+					photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+					homeInstitution: "Dhaka College, Dhaka, Bangladesh",
+					country: "Cyprus",
+					universityName: "American University of Cyprus (AUCY)",
+					degreeName: "BSc in Computer Science",
+					intake: "Fall 2026 Intake",
+					visaDate: "July 2026",
+					youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+					scholarshipNote: "50% Merit Scholarship Awarded",
+					storyContent:
+						"From Dhaka College to Larnaca, Cyprus! Rise Abroad Education guided me through every step from document apostille to visa interview preparation. With their expert counseling, I secured a 50% tuition scholarship and my European student visa within just 3 weeks.",
+					isPublished: true,
+					createdBy: superAdminUser.id,
+				},
+				{
+					studentName: "Tanvir Ahmed",
+					photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+					homeInstitution: "Notre Dame College, Dhaka, Bangladesh",
+					country: "United Kingdom",
+					universityName: "University of Hertfordshire",
+					degreeName: "MSc in Data Science & AI",
+					intake: "Spring 2026 Intake",
+					visaDate: "January 2026",
+					youtubeUrl: "https://www.youtube.com/watch?v=7wtfhZwyrcc",
+					scholarshipNote: "£3,000 Dean's Excellence Scholarship",
+					storyContent:
+						"Securing my UK visa with zero hassle was made possible by Rise Abroad Education. Their dedicated counselor reviewed my SOP five times and conducted rigorous mock interviews that made the real embassy interview feel effortless.",
+					isPublished: true,
+					createdBy: superAdminUser.id,
+				},
+				{
+					studentName: "Sadia Rahman",
+					photoUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
+					homeInstitution: "Viqarunnisa Noon College, Dhaka",
+					country: "Canada",
+					universityName: "University of Windsor",
+					degreeName: "BBA in International Business",
+					intake: "Fall 2026 Intake",
+					visaDate: "August 2026",
+					youtubeUrl: "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
+					scholarshipNote: "$5,000 CAD Entrance Award",
+					storyContent:
+						"My dream of studying in Canada became a reality through Rise Abroad Education. They provided completely transparent guidelines on the SDS stream, GIC account creation, and financial proof documentation.",
+					isPublished: true,
+					createdBy: superAdminUser.id,
+				},
+			];
+
+			for (const story of successStories) {
+				await prisma.studentSuccessStory.create({
+					data: story,
+				});
+			}
+			console.log("[Seed] Demo Student Success Stories Seeded Successfully.");
+		}
+
 		console.log("[Seed] Initial Demo Data & Seed Verified Successfully.");
 	} catch (error) {
 		console.log(

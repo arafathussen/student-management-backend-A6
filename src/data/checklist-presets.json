@@ -1,0 +1,302 @@
+[
+  {
+    "id": "preset_5_docs",
+    "title": "Core Academic & Identity Bundle (5 Docs)",
+    "description": "Essential foundation requirements required for initial university evaluation.",
+    "category": "General",
+    "isDefault": true,
+    "createdAt": "2026-10-24T14:59:56.805Z",
+    "updatedAt": "2026-10-24T14:59:56.806Z",
+    "items": [
+      {
+        "id": "item_p5_1",
+        "title": "Passport Copy (Information Page)",
+        "instruction": "Upload high-quality color scanned copy of valid international Passport (Information & signature page).",
+        "isRequired": true,
+        "category": "Identity"
+      },
+      {
+        "id": "item_p5_2",
+        "title": "Academic Transcripts & Certificates",
+        "instruction": "Upload official verified scanned copies of academic degree certificates and all marksheets.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p5_3",
+        "title": "English Language Proficiency (IELTS / PTE / MOI)",
+        "instruction": "Upload valid official score report (IELTS/PTE/TOEFL) or English Medium of Instruction certificate.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p5_4",
+        "title": "Statement of Purpose (SOP)",
+        "instruction": "Upload detailed personal statement explaining academic motivation, university selection, and career goals.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p5_5",
+        "title": "Letters of Recommendation (LOR - 2 Copies)",
+        "instruction": "Upload 2 signed recommendation letters from university professors or current professional employer.",
+        "isRequired": true,
+        "category": "Academic"
+      }
+    ]
+  },
+  {
+    "id": "preset_7_docs",
+    "title": "Standard Admission & Solvency Pack (7 Docs)",
+    "description": "Standard comprehensive bundle with 6-month financial verification.",
+    "category": "General",
+    "isDefault": true,
+    "createdAt": "2026-10-24T14:59:56.806Z",
+    "updatedAt": "2026-10-24T14:59:56.806Z",
+    "items": [
+      {
+        "id": "item_p7_1",
+        "title": "Passport Copy (Information Page)",
+        "instruction": "Upload high-quality color scanned copy of valid international Passport.",
+        "isRequired": true,
+        "category": "Identity"
+      },
+      {
+        "id": "item_p7_2",
+        "title": "Academic Transcripts & Certificates",
+        "instruction": "Upload official verified scanned copies of degree and transcripts.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p7_3",
+        "title": "English Language Proficiency (IELTS / PTE / MOI)",
+        "instruction": "Upload valid English language proficiency scorecard.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p7_4",
+        "title": "Statement of Purpose (SOP)",
+        "instruction": "Upload personal statement tailored for program admission.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p7_5",
+        "title": "Letters of Recommendation (LOR - 2 Copies)",
+        "instruction": "Upload 2 signed recommendation letters.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p7_6",
+        "title": "Bank Solvency Certificate & 6-Month Statement",
+        "instruction": "Upload official bank solvency certificate with minimum 6 months history showing continuous balance.",
+        "isRequired": true,
+        "category": "Financial"
+      },
+      {
+        "id": "item_p7_7",
+        "title": "Police Clearance Certificate (PCC)",
+        "instruction": "Upload government-issued official police clearance certificate (issued within last 6 months).",
+        "isRequired": true,
+        "category": "Security"
+      }
+    ]
+  },
+  {
+    "id": "preset_9_docs",
+    "title": "Complete Visa & Embassy Dossier (9 Docs)",
+    "description": "Full dossier containing medical, financial, identity, and background documentation.",
+    "category": "General",
+    "isDefault": true,
+    "createdAt": "2026-10-24T14:59:56.806Z",
+    "updatedAt": "2026-10-24T14:59:56.806Z",
+    "items": [
+      {
+        "id": "item_p9_1",
+        "title": "Passport Copy (Information Page)",
+        "instruction": "Upload high-quality color scanned copy of valid international Passport.",
+        "isRequired": true,
+        "category": "Identity"
+      },
+      {
+        "id": "item_p9_2",
+        "title": "Academic Transcripts & Certificates",
+        "instruction": "Upload official verified scanned copies of degree and marksheets.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p9_3",
+        "title": "English Language Proficiency (IELTS / PTE / MOI)",
+        "instruction": "Upload valid English test scorecard (IELTS/PTE).",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p9_4",
+        "title": "Statement of Purpose (SOP)",
+        "instruction": "Upload comprehensive academic Statement of Purpose.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p9_5",
+        "title": "Letters of Recommendation (LOR - 2 Copies)",
+        "instruction": "Upload 2 signed reference letters.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_p9_6",
+        "title": "Bank Solvency Certificate & 6-Month Statement",
+        "instruction": "Upload bank solvency certificate and verified 6 months bank statement.",
+        "isRequired": true,
+        "category": "Financial"
+      },
+      {
+        "id": "item_p9_7",
+        "title": "Police Clearance Certificate (PCC)",
+        "instruction": "Upload official police verification certificate.",
+        "isRequired": true,
+        "category": "Security"
+      },
+      {
+        "id": "item_p9_8",
+        "title": "Medical Fitness & Vaccination Certificate",
+        "instruction": "Upload certified health examination report and TB/vaccine clearance certificate.",
+        "isRequired": true,
+        "category": "Medical"
+      },
+      {
+        "id": "item_p9_9",
+        "title": "Updated Curriculum Vitae (CV / Resume)",
+        "instruction": "Upload professional resume formatted for embassy and admission review.",
+        "isRequired": true,
+        "category": "Academic"
+      }
+    ]
+  },
+  {
+    "id": "preset_uk_tier4",
+    "title": "UK Student Route (CAS & Visa Pack)",
+    "description": "Required checklist for UK universities and UKVI visa appointment.",
+    "category": "United Kingdom",
+    "isDefault": false,
+    "createdAt": "2026-10-24T14:59:56.806Z",
+    "updatedAt": "2026-10-24T14:59:56.806Z",
+    "items": [
+      {
+        "id": "item_uk_1",
+        "title": "Valid International Passport",
+        "instruction": "Upload color scan of passport with at least 6 months validity.",
+        "isRequired": true,
+        "category": "Identity"
+      },
+      {
+        "id": "item_uk_2",
+        "title": "Official CAS Statement Copy",
+        "instruction": "Upload formal Confirmation of Acceptance for Studies issued by UK university.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_uk_3",
+        "title": "UKVI Academic Transcripts & Degrees",
+        "instruction": "Upload all academic transcripts referenced in your CAS letter.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_uk_4",
+        "title": "IELTS for UKVI or SELT Scorecard",
+        "instruction": "Upload official SELT certificate showing CEFR B2 level proficiency.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_uk_5",
+        "title": "28-Day Financial Bank Statement",
+        "instruction": "Upload 28-day continuous funds statement covering tuition + UK maintenance.",
+        "isRequired": true,
+        "category": "Financial"
+      },
+      {
+        "id": "item_uk_6",
+        "title": "Tuberculosis (TB) Test Certificate (IOM)",
+        "instruction": "Upload TB test report issued by an approved IOM diagnostic center.",
+        "isRequired": true,
+        "category": "Medical"
+      },
+      {
+        "id": "item_uk_7",
+        "title": "Consent Letter & Birth Certificate (If Sponsored)",
+        "instruction": "If using parental funds, upload sponsor affidavit and official birth certificate.",
+        "isRequired": false,
+        "category": "Financial"
+      }
+    ]
+  },
+  {
+    "id": "preset_canada_sds",
+    "title": "Canada Study Permit (SDS & PAL Pack)",
+    "description": "Complete requirements for IRCC Canadian student visa filing.",
+    "category": "Canada",
+    "isDefault": false,
+    "createdAt": "2026-10-24T14:59:56.806Z",
+    "updatedAt": "2026-10-24T14:59:56.806Z",
+    "items": [
+      {
+        "id": "item_ca_1",
+        "title": "Valid International Passport",
+        "instruction": "Upload clear bio-data pages of international passport.",
+        "isRequired": true,
+        "category": "Identity"
+      },
+      {
+        "id": "item_ca_2",
+        "title": "DLI Letter of Acceptance (LOA)",
+        "instruction": "Upload official unconditional acceptance letter from designated learning institution.",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_ca_3",
+        "title": "Provincial Attestation Letter (PAL)",
+        "instruction": "Upload government-issued provincial attestation letter (PAL).",
+        "isRequired": true,
+        "category": "Academic"
+      },
+      {
+        "id": "item_ca_4",
+        "title": "Guaranteed Investment Certificate (GIC)",
+        "instruction": "Upload GIC proof of purchase ($20,635 CAD) from approved Canadian financial institution.",
+        "isRequired": true,
+        "category": "Financial"
+      },
+      {
+        "id": "item_ca_5",
+        "title": "First-Year Tuition Fee Payment Receipt",
+        "instruction": "Upload official wire transfer receipt confirming full 1st year tuition payment.",
+        "isRequired": true,
+        "category": "Financial"
+      },
+      {
+        "id": "item_ca_6",
+        "title": "Upfront eMedical Examination Sheet",
+        "instruction": "Upload information sheet provided by panel physician after medical exam.",
+        "isRequired": true,
+        "category": "Medical"
+      },
+      {
+        "id": "item_ca_7",
+        "title": "Police Clearance Certificate",
+        "instruction": "Upload police clearance certificate issued within the past 6 months.",
+        "isRequired": true,
+        "category": "Security"
+      }
+    ]
+  }
+]

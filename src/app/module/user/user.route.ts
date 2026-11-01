@@ -48,6 +48,12 @@ router.patch(
 	UserController.updateUserStatus,
 );
 
+router.patch(
+	"/:userId/role",
+	checkAuth("SUPER_ADMIN"),
+	UserController.updateUserRole,
+);
+
 router.delete(
 	"/:userId",
 	checkAuth("SUPER_ADMIN", "ADMIN"),

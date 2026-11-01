@@ -105,6 +105,11 @@ model HigherStudyApplication {
   documents           ApplicationDocument[]
   payments            Payment[]
   notes               CounselorNote[]
+  internalNotes       ApplicationInternalNote[]
+
+  appliedUniversities Json?
+  customInformation   Json?
+  trackingMilestones  Json?
 
   isDeleted           Boolean               @default(false)
   deletedAt           DateTime?
@@ -112,6 +117,24 @@ model HigherStudyApplication {
   updatedAt           DateTime              @updatedAt
 
   @@map("higher_study_applications")
+}
+
+model ApplicationInternalNote {
+  id            String                 @id @default(uuid(7))
+  note          String                 @db.Text
+  authorId      String
+  authorName    String
+  authorRole    String                 @default("ADMIN")
+  authorAvatar  String?
+
+  applicationId String
+  application   HigherStudyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@index([applicationId])
+  @@map("application_internal_notes")
 }
 
 model CounselorNote {
@@ -162,6 +185,9 @@ model BlogPost {
   tags        String[] @default([])
   isPublished Boolean  @default(true)
 
+  isDeleted   Boolean  @default(false)
+  deletedAt   DateTime?
+
   authorId    String
   author      User     @relation(fields: [authorId], references: [id])
 
@@ -169,6 +195,70 @@ model BlogPost {
   updatedAt   DateTime @updatedAt
 
   @@map("blog_posts")
+}
+
+model StudentSuccessStory {
+  id              String    @id @default(uuid(7))
+  slug            String?
+  studentName     String
+  photoUrl        String?
+  thumbnailUrl    String?
+  homeInstitution String
+  hometown        String?
+  country         String
+  universityName  String
+  degreeName      String
+  intake          String?
+  visaDate        String?
+  youtubeUrl      String?
+  testimonial     String?   @db.Text
+  storyContent    String    @db.Text
+  scholarshipNote String?
+  viewsCount      Int       @default(0)
+  isPublished     Boolean   @default(true)
+  isDeleted       Boolean   @default(false)
+  deletedAt       DateTime?
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([slug])
+  @@map("student_success_stories")
+}
+
+model SuccessPageSetting {
+  id              String   @id @default(uuid(7))
+  badgeText       String   @default("Real Students • Real Visas • Proven Results")
+  titlePart1      String   @default("Student")
+  titlePart2      String   @default("Success Stories")
+  description     String   @default("Celebrating Bangladeshi students accepted into premier global universities. Watch their interviews, read their visa journeys, and discover scholarship awards achieved with Rise Abroad Education.")
+  stat1Value      String   @default("98.4%")
+  stat1Label      String   @default("Visa Success Rate")
+  stat2Value      String   @default("1,250+")
+  stat2Label      String   @default("Visas Approved")
+  stat3Value      String   @default("50%+")
+  stat3Label      String   @default("Average Scholarship")
+  stat4Value      String   @default("15+")
+  stat4Label      String   @default("Study Destinations")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("success_page_settings")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid(7))
+  action      String
+  module      String
+  targetId    String
+  targetTitle String?
+  performedBy String
+  userName    String?
+  userEmail   String?
+  details     String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@map("activity_logs")
 }
 
 model AgencyCommission {

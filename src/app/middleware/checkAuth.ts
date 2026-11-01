@@ -80,8 +80,16 @@ export const checkAuth = (...requiredRoles: Role[]) => {
 
 			if (user.status === "BLOCKED") {
 				throw new AppError(
-					httpStatus.FORBIDDEN,
-					"Your account has been suspended/blocked!",
+					httpStatus.UNAUTHORIZED,
+					"Your account has been banned by the administrator. Please contact your admin.",
+				);
+			}
+
+			// Invalidate session immediately if user's role has been updated in database
+			if (payload.role && payload.role !== user.role) {
+				throw new AppError(
+					httpStatus.UNAUTHORIZED,
+					"Your account role has been updated by an administrator. Please log in again.",
 				);
 			}
 

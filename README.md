@@ -737,28 +737,39 @@ When you log in with different roles, copy the `accessToken` from the response i
 
 ---
 
-### Module 8: Stripe Payments & Invoices (`/api/v1/payments`)
+### Module 8: Stripe Payments, Invoices & Receipts (`/api/v1/payments`)
 
-#### 8.1 Create Stripe Payment Intent (Fee / Deposit)
+#### 8.1 Create Stripe Checkout Session (Tuition / Deposit)
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/payments/create-intent`
+- **URL:** `{{baseUrl}}/payments/create-checkout-session`
 - **Headers:**
   - `Content-Type: application/json`
   - `Authorization: Bearer {{studentToken}}`
 - **Request Body (JSON):**
 ```json
 {
-  "amount": 500,
-  "currency": "USD",
-  "paymentType": "OFFER_DEPOSIT",
-  "higherStudyApplicationId": "REPLACE_WITH_APPLICATION_ID",
-  "description": "Initial offer letter release deposit for AUCY"
+  "amount": 250,
+  "paymentType": "TUITION_FEE",
+  "description": "Fall 2026 Semester Tuition - Rise Abroad Education"
 }
 ```
+- **Response:** Returns `checkoutUrl` (Stripe Checkout link) and `paymentId`.
+- **Stripe Testing Card Details:**
+  - **Card Number:** `4242 4242 4242 4242`
+  - **Expiry Date:** Any future date (e.g. `12/28`)
+  - **CVC:** `123`
 
 ---
 
-#### 8.2 Get My Payments & Invoices
+#### 8.2 Download Official Payment Receipt PDF
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/payments/receipt/{paymentId}`
+- **Headers:** `Authorization: Bearer {{studentToken}}`
+- **Description:** Generates and downloads an official electronically-verified PDF payment receipt with "Rise Abroad Education" header.
+
+---
+
+#### 8.3 Get My Payments & Invoices
 - **Method:** `GET`
 - **URL:** `{{baseUrl}}/payments/my-payments`
 - **Headers:** `Authorization: Bearer {{studentToken}}`

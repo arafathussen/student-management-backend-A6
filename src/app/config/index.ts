@@ -33,7 +33,7 @@ export default {
 	smtp_user: process.env.SMTP_USER || "",
 	smtp_password: process.env.SMTP_PASSWORD || "",
 	email_sender:
-		process.env.EMAIL_SENDER || "University Portal <no-reply@university.ac>",
+		process.env.EMAIL_SENDER || "Rise Abroad Education <no-reply@riseabroad.com>",
 
 	redis_url: process.env.REDIS_URL,
 	redis_host: process.env.REDIS_HOST || "127.0.0.1",
