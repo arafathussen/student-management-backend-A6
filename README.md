@@ -1,64 +1,69 @@
-# Rise Abroad Education — Backend API
+# 🎓 University Management System — Enterprise Backend API
+> **Level 2 Web Development — Batch 7 Assignment 6 (B7A6)**  
+> **Student ID Category:** Ending with **9** ➔ **University Management System**
+
+An enterprise-grade, scalable, and secure RESTful backend API built with **Node.js, TypeScript, Express 5, PostgreSQL, and Prisma ORM**. Features complete role-based access control (RBAC) across 3 distinct roles, transaction-safe course enrollment with prerequisite and seat capacity management, automated GPA/transcript PDF generation, real Stripe checkout payment processing, and comprehensive administrative analytics.
 
 ---
 
-## Quick Links & Resources
-- **Postman Collection File:** [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json)
-- **Local API Base URL:** `http://localhost:5000/api/v1`
-- **Frontend Dev URL:** `http://localhost:3000`
-- **Live Production URL:** `https://rise-abroad-student-management.vercel.app/api/v1`
+## 🌐 Quick Links & Resources
+
+| Resource | URL / Location | Description |
+|---|---|---|
+| **🚀 Live Production API** | `https://rise-abroad-student-management.vercel.app/api/v1` | Hosted live on Vercel Serverless Functions |
+| **💻 Local API Base URL** | `http://localhost:5000/api/v1` | Local development server |
+| **📦 GitHub Repository** | [student-management-backend-A6](https://github.com/arafathussen/student-management-backend-A6) | Complete source code with 39+ meaningful commits |
+| **📑 Postman Collection (File)** | [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json) | 13 folders, 74 structured requests v2.1.0 |
+| **🔗 Postman Published Docs** | `https://documenter.getpostman.com/view/YOUR_VIEW_ID` | Interactive web documentation (Publish from Postman) |
 
 ---
 
-## Pre-Configured Test Accounts (RBAC Roles)
+## 👥 Pre-Configured Test Accounts (RBAC Roles)
 
-Use these active accounts seeded in the PostgreSQL database for testing all role-based permissions:
+Use these active accounts seeded directly in the PostgreSQL database for testing all role-based permissions and 403 Forbidden checks:
 
-| Role | Email | Password | Access Privileges |
+| Role | Email | Password | Access Privileges & Capabilities |
 |---|---|---|---|
-| **Super Admin** | `admin@university.com` | `AdminPassword123!` | System control, Commission ledger, Admin creation, Full RBAC |
-| **Senior Counselor** | `counselor@university.com` | `Counselor123!` | Application desk, Document verification, Notes, Offer letters |
-| **Student Applicant** | `arafat.student@gmail.com` | `Student123!` | Higher study applications, Document uploads, Offer letter download, Chat |
+| 👑 **Super Admin** | `admin@university.com` | `AdminPassword123!` | System-wide master control, user status & role management, department/semester/course setup, dashboard analytics |
+| 🧑‍🏫 **Senior Counselor / Admin** | `counselor@university.com` | `Counselor123!` | Academic desk, attendance recording, grade submission, student application management, document verification |
+| 🎓 **Student Applicant** | `arafat.student@gmail.com` | `Student123!` | Course enrollment, semester course registration, transcript PDF download, attendance records, Stripe fee payments |
 
 ---
 
-## Postman Setup & Environment Switching Guide
+## 🚀 Postman Setup & Instant Testing Guide
 
-### Step 1: Import the Postman Collection
+### Step 1: Import Collection
 1. Open **Postman**.
-2. Click **Import** (Top left).
-3. Drag & drop or select the file [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json).
+2. Click **Import** (Top left) and select [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json).
 
-### Step 2: Switching Between Localhost & Live Production URL
-The collection uses a single dynamic variable `{{baseUrl}}` for every request:
-1. Click on the collection title: **`Rise Abroad Education Management System`**.
-2. Navigate to the **Variables** tab.
-3. Edit the `Current Value` of `baseUrl`:
+### Step 2: Switch Between Live Production & Local Server
+The collection uses a dynamic collection variable `{{baseUrl}}`:
+1. Click on collection: **`Rise Abroad Education Management System`**.
+2. Go to the **Variables** tab.
+3. Edit `Current Value` of `baseUrl`:
+   - **For Live Production Testing (Recommended):** `https://rise-abroad-student-management.vercel.app/api/v1`
    - **For Local Testing:** `http://localhost:5000/api/v1`
-   - **For Live Production:** `https://rise-abroad-student-management.vercel.app/api/v1`
-4. Press `Ctrl + S` (or `Cmd + S`) to save. Every endpoint in the collection will now point to your target server!
+4. Press `Ctrl + S` to save.
 
-### Step 3: Managing JWT Authorization Tokens
-When you log in with different roles, copy the `accessToken` from the response into the collection variables:
-- `superAdminToken` — Access token after logging in as `admin@university.com`
-- `adminToken` — Access token after logging in as an Admin
-- `counselorToken` — Access token after logging in as `counselor@university.com`
-- `studentToken` — Access token after logging in as `arafat.student@gmail.com`
+### Step 3: Authorization Tokens
+When you login using any account from **Module 1**, copy the `accessToken` and paste it into the respective collection variable:
+- `superAdminToken` — Set after logging in as `admin@university.com`
+- `counselorToken` — Set after logging in as `counselor@university.com`
+- `studentToken` — Set after logging in as `arafat.student@gmail.com`
 
 ---
 
-## Complete Step-by-Step API Documentation & Request Payloads
+## 📚 Complete Step-by-Step API Documentation & Request Payloads
 
 ---
 
 ### Module 1: Authentication & Security (`/api/v1/auth`)
 
-#### 1.1 Register Student
+#### 1.1 Register Student Account
 - **Method:** `POST`
 - **URL:** `{{baseUrl}}/auth/register`
 - **Headers:** `Content-Type: application/json`
-- **Description:** Registers a new student account and triggers a 6-digit OTP to the provided email (supports Gmail, Yahoo, Outlook, and any custom domain).
-- **Request Body (JSON):**
+- **Request Body:**
 ```json
 {
   "name": "Arafat Hussen",
@@ -67,7 +72,7 @@ When you log in with different roles, copy the `accessToken` from the response i
   "contactNumber": "+8801700000000",
   "address": "Dhaka, Bangladesh",
   "gender": "MALE",
-  "accessScope": "HIGHER_STUDY_ONLY"
+  "accessScope": "BOTH"
 }
 ```
 - **Response (201 Created):**
@@ -77,7 +82,7 @@ When you log in with different roles, copy the `accessToken` from the response i
   "statusCode": 201,
   "message": "User registered successfully! A 6-digit verification OTP has been sent to your email.",
   "data": {
-    "userId": "cm123456789...",
+    "userId": "0194b1ef-...",
     "email": "arafat.student@gmail.com",
     "status": "PENDING_VERIFICATION"
   }
@@ -90,8 +95,7 @@ When you log in with different roles, copy the `accessToken` from the response i
 - **Method:** `POST`
 - **URL:** `{{baseUrl}}/auth/verify-email`
 - **Headers:** `Content-Type: application/json`
-- **Description:** Verifies the user's email with the OTP received via email and activates their account.
-- **Request Body (JSON):**
+- **Request Body:**
 ```json
 {
   "email": "arafat.student@gmail.com",
@@ -113,26 +117,11 @@ When you log in with different roles, copy the `accessToken` from the response i
 
 ---
 
-#### 1.3 Resend OTP
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/auth/resend-otp`
-- **Headers:** `Content-Type: application/json`
-- **Description:** Resends a fresh 6-digit OTP code to the user's email.
-- **Request Body (JSON):**
-```json
-{
-  "email": "arafat.student@gmail.com"
-}
-```
-
----
-
-#### 1.4 Login (Super Admin / Admin / Counselor / Student)
+#### 1.3 Login User (Generates Access Token)
 - **Method:** `POST`
 - **URL:** `{{baseUrl}}/auth/login`
 - **Headers:** `Content-Type: application/json`
-- **Description:** Authenticates any registered user and returns a JWT Bearer access token and refresh token.
-- **Request Body (JSON):**
+- **Request Body:**
 ```json
 {
   "email": "admin@university.com",
@@ -144,15 +133,16 @@ When you log in with different roles, copy the `accessToken` from the response i
 {
   "success": true,
   "statusCode": 200,
-  "message": "User logged in successfully!",
+  "message": "Logged in successfully!",
   "data": {
     "accessToken": "eyJhbGciOiJIUzI1NiIsIn...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsIn...",
     "user": {
-      "id": "cm123...",
+      "id": "0194b1ee-...",
+      "name": "System Super Admin",
       "email": "admin@university.com",
-      "name": "Super Admin",
-      "role": "SUPER_ADMIN"
+      "role": "SUPER_ADMIN",
+      "status": "ACTIVE"
     }
   }
 }
@@ -160,592 +150,399 @@ When you log in with different roles, copy the `accessToken` from the response i
 
 ---
 
-#### 1.5 Google Social Login (One-Tap)
+#### 1.4 Google GCP Social Login
 - **Method:** `POST`
 - **URL:** `{{baseUrl}}/auth/google`
 - **Headers:** `Content-Type: application/json`
-- **Description:** Authenticates or auto-registers a user via Google One-Tap OAuth token.
-- **Request Body (JSON):**
+- **Request Body:**
 ```json
 {
-  "idToken": "mock-google-id-token"
+  "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6...",
+  "role": "STUDENT"
 }
 ```
 
 ---
 
-#### 1.6 Forgot Password (Request OTP)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/auth/forgot-password`
-- **Headers:** `Content-Type: application/json`
-- **Description:** Dispatches a password reset OTP to the user's registered email address.
-- **Request Body (JSON):**
-```json
-{
-  "email": "arafat.student@gmail.com"
-}
-```
-
----
-
-#### 1.7 Reset Password (With OTP)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/auth/reset-password`
-- **Headers:** `Content-Type: application/json`
-- **Description:** Sets a new password using the received OTP code.
-- **Request Body (JSON):**
-```json
-{
-  "email": "arafat.student@gmail.com",
-  "otpCode": "123456",
-  "newPassword": "NewPassword123!"
-}
-```
-
----
-
-#### 1.8 Change Password (Authenticated)
+#### 1.5 Change Password (Protected)
 - **Method:** `POST`
 - **URL:** `{{baseUrl}}/auth/change-password`
 - **Headers:**
   - `Content-Type: application/json`
   - `Authorization: Bearer {{studentToken}}`
-- **Request Body (JSON):**
+- **Request Body:**
 ```json
 {
-  "currentPassword": "Student123!",
-  "newPassword": "StudentNewPass123!"
+  "oldPassword": "Student123!",
+  "newPassword": "NewStudentPass123!"
 }
 ```
 
 ---
 
-### Module 2: User & RBAC Management (`/api/v1/users`)
+### Module 2: User Profile & Role Management (`/api/v1/users`)
 
 #### 2.1 Get My Profile
 - **Method:** `GET`
 - **URL:** `{{baseUrl}}/users/me`
-- **Headers:** `Authorization: Bearer {{superAdminToken}}`
+- **Headers:** `Authorization: Bearer {{studentToken}}`
+- **Response (200 OK):** Returns current authenticated user record with student/counselor/faculty profile details.
 
 ---
 
-#### 2.2 Create Admin (Super Admin Only)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/users/create-admin`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{superAdminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "name": "Academic Admin 1",
-  "email": "admin1@university.com",
-  "password": "Admin12345!"
-}
-```
-
----
-
-#### 2.3 Create Counselor (Super Admin or Admin)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/users/create-counselor`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "name": "Sarah Jenkins",
-  "email": "sarah.counselor@university.com",
-  "password": "Counselor123!",
-  "designation": "Senior European Education Counselor",
-  "contactNumber": "+8801711223344",
-  "specialization": "Cyprus & UK Admissions"
-}
-```
-
----
-
-#### 2.4 Custom Create User (Super Admin Only)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/users/custom-create`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{superAdminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "name": "Custom Branch Officer",
-  "email": "officer@branch.university.com",
-  "password": "Officer12345!",
-  "role": "COUNSELOR"
-}
-```
-
----
-
-#### 2.5 Admin Reset User Password
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/users/reset-user-password`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "userId": "REPLACE_WITH_USER_ID",
-  "newPassword": "ResetPass12345!",
-  "sendResetEmail": false
-}
-```
-
----
-
-#### 2.6 Update User Status (ACTIVE / BLOCKED)
+#### 2.2 Update User Status (Admin Only)
 - **Method:** `PATCH`
 - **URL:** `{{baseUrl}}/users/{userId}/status`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
 ```json
 {
-  "status": "BLOCKED"
+  "status": "ACTIVE"
 }
 ```
+*(Options: `ACTIVE`, `INACTIVE`, `BLOCKED`)*
 
 ---
 
-#### 2.7 Get All Users (Filtered by RBAC)
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/users?page=1&limit=10`
-- **Headers:** `Authorization: Bearer {{adminToken}}`
-
----
-
-### Module 3: Global Higher Study & Universities (`/api/v1/higher-study`)
-
-#### 3.1 Get All Countries
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/countries`
-- **Headers:** *None (Public endpoint)*
-
----
-
-#### 3.2 Create Country (Admin)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/countries`
+#### 2.3 Update User Role (Super Admin Only)
+- **Method:** `PATCH`
+- **URL:** `{{baseUrl}}/users/{userId}/role`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
 ```json
 {
-  "name": "United Kingdom",
-  "code": "GB",
-  "currency": "GBP",
-  "description": "Study in the UK - Top ranking universities with post-study work visa opportunities.",
-  "flagUrl": "https://flagcdn.com/w320/gb.png"
+  "role": "ADMIN"
+}
+```
+*(Options: `SUPER_ADMIN`, `ADMIN`, `COUNSELOR`, `STUDENT`)*
+
+---
+
+#### 2.4 Get All Users with Pagination & Search
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/users?page=1&limit=10&role=STUDENT&searchTerm=Arafat`
+- **Headers:** `Authorization: Bearer {{superAdminToken}}`
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Users fetched successfully!",
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  },
+  "data": [ ... ]
 }
 ```
 
 ---
 
-#### 3.3 Get Global Universities
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/universities?page=1&limit=10`
-- **Headers:** *None (Public endpoint)*
+### Module 3: Academic Curriculum & Structure (`/api/v1/academic`)
 
----
-
-#### 3.4 Create Global University
+#### 3.1 Create Academic Department
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/universities`
+- **URL:** `{{baseUrl}}/academic/departments`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
 ```json
 {
-  "name": "American University of Cyprus",
-  "city": "Larnaca",
-  "countryId": "REPLACE_WITH_COUNTRY_ID",
-  "website": "https://aucy.ac.cy",
-  "description": "Premier American curriculum institution in Cyprus.",
-  "paymentType": "OFFER_DEPOSIT",
-  "applicationFee": 0,
-  "offerDepositFee": 500
+  "name": "Computer Science & Engineering",
+  "code": "CSE",
+  "description": "Department of Computer Science and Engineering"
+}
+```
+- **Response (201 Created):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Academic department created successfully!",
+  "data": {
+    "id": "0194b1ef-...",
+    "name": "Computer Science & Engineering",
+    "code": "CSE",
+    "description": "Department of Computer Science and Engineering"
+  }
 }
 ```
 
 ---
 
-#### 3.5 Add Dynamic Document Requirement to University
+#### 3.2 Get All Academic Departments
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/academic/departments`
+- **Headers:** None (Public)
+
+---
+
+#### 3.3 Create Academic Semester
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/universities/{universityId}/doc-requirements`
+- **URL:** `{{baseUrl}}/academic/semesters`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
 ```json
 {
-  "title": "Valid Passport Copy",
-  "description": "Scanned copy of bio-data page (Min 2 years validity)",
-  "isRequired": true,
-  "docType": "PDF"
+  "name": "Fall 2026",
+  "code": "FALL-2026",
+  "startDate": "2026-09-01T00:00:00.000Z",
+  "endDate": "2026-12-31T23:59:59.000Z",
+  "isCurrent": true
+}
+```
+- **Response (201 Created):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Academic semester created successfully!",
+  "data": {
+    "id": "0194b1f0-...",
+    "name": "Fall 2026",
+    "code": "FALL-2026",
+    "isCurrent": true
+  }
 }
 ```
 
 ---
 
-#### 3.6 Get University Doc Requirements
+#### 3.4 Get All Academic Semesters
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/universities/{universityId}/doc-requirements`
-- **Headers:** *None (Public endpoint)*
+- **URL:** `{{baseUrl}}/academic/semesters`
+- **Headers:** None (Public)
 
 ---
 
-#### 3.7 Get Global Degree Programs
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/programs?page=1&limit=10`
-- **Headers:** *None (Public endpoint)*
-
----
-
-#### 3.8 Create Degree Program (Admin)
+#### 3.5 Create Course (with Credits & Tuition Fee)
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/programs`
+- **URL:** `{{baseUrl}}/academic/courses`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
 ```json
 {
-  "name": "BSc in Computer Science",
-  "universityId": "REPLACE_WITH_UNIVERSITY_ID",
-  "degreeLevel": "BACHELOR",
-  "durationYears": 4.0,
-  "tuitionFee": 6650.0,
-  "initialDeposit": 4000.0,
-  "intakeSeason": "Fall 2026",
-  "ieltsRequirement": 5.0,
-  "academicRequirement": "Minimum 60% in HSC"
+  "title": "Data Structures & Algorithms",
+  "code": "CSE-201",
+  "credits": 3,
+  "tuitionFee": 15000,
+  "description": "Core algorithm analysis, trees, graphs, and sorting",
+  "departmentId": "PASTE_DEPARTMENT_ID_HERE"
+}
+```
+*(Optional prerequisite check: supply `"prerequisiteId": "PASTE_PREREQ_COURSE_ID"`)*
+
+---
+
+#### 3.6 Get All Courses
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/academic/courses`
+- **Headers:** None (Public)
+
+---
+
+#### 3.7 Create Course Section (with Seat Capacity Limit)
+- **Method:** `POST`
+- **URL:** `{{baseUrl}}/academic/sections`
+- **Headers:**
+  - `Content-Type: application/json`
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
+```json
+{
+  "sectionName": "Section 1",
+  "maxCapacity": 40,
+  "roomNumber": "Lab-402",
+  "scheduleTime": "Sunday / Tuesday 10:00 AM - 11:30 AM",
+  "courseId": "PASTE_COURSE_ID_HERE",
+  "semesterId": "PASTE_SEMESTER_ID_HERE"
 }
 ```
 
 ---
 
-### Module 4: Student Applications & Counselor Desk (`/api/v1/higher-study`)
+#### 3.8 Get Sections by Course ID
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/academic/sections/{courseId}`
+- **Headers:** None (Public)
 
-#### 4.1 Apply for Degree Program (Student)
+---
+
+### Module 4: Course Enrollment & Registration (`/api/v1/enrollments`)
+
+#### 4.1 Register Course Section (Transaction-Safe)
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/applications/apply`
+- **URL:** `{{baseUrl}}/enrollments/register`
 - **Headers:**
   - `Content-Type: application/json`
   - `Authorization: Bearer {{studentToken}}`
-- **Request Body (JSON):**
+- **Business Operations Handled:**
+  - Checks if section exists and has available seats (`availableSeats > 0`).
+  - Checks if student already enrolled in another section of this course in the current semester.
+  - Validates course prerequisite: Student must have completed & passed the prerequisite course.
+  - Executes inside a **Prisma Interactive Transaction**: decrements available seats by 1 and registers the student.
+- **Request Body:**
 ```json
 {
-  "programId": "REPLACE_WITH_PROGRAM_ID"
+  "sectionId": "PASTE_SECTION_ID_HERE"
+}
+```
+- **Response (201 Created):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Successfully enrolled in course section!",
+  "data": {
+    "id": "0194b1f2-...",
+    "status": "ENROLLED",
+    "enrolledAt": "2026-11-01T08:00:00.000Z",
+    "section": {
+      "sectionName": "Section 1",
+      "availableSeats": 39
+    }
+  }
 }
 ```
 
 ---
 
-#### 4.2 Get My Applications (Student)
+#### 4.2 Get My Enrolled Courses
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/applications/my`
+- **URL:** `{{baseUrl}}/enrollments/my-courses`
 - **Headers:** `Authorization: Bearer {{studentToken}}`
 
 ---
 
-#### 4.3 Get All Applications (Admin & Counselor)
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/applications?page=1&limit=10`
-- **Headers:** `Authorization: Bearer {{adminToken}}`
+#### 4.3 Drop Course Section
+- **Method:** `DELETE`
+- **URL:** `{{baseUrl}}/enrollments/{enrollmentId}`
+- **Headers:** `Authorization: Bearer {{studentToken}}`
+- **Business Logic:** Automatically marks enrollment as `DROPPED` and restores section seat count by +1 in transaction.
 
 ---
 
-#### 4.4 Assign Counselor to Application
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/higher-study/applications/{applicationId}/assign-counselor`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "counselorId": "REPLACE_WITH_COUNSELOR_ID"
-}
-```
+### Module 5: Student Attendance System (`/api/v1/attendance`)
 
----
-
-#### 4.5 Add Counselor Note (Private or Public)
+#### 5.1 Record Daily Section Attendance
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/applications/{applicationId}/notes`
+- **URL:** `{{baseUrl}}/attendance/record`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{counselorToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{counselorToken}}` (or `{{superAdminToken}}`)
+- **Request Body:**
 ```json
 {
-  "note": "Please re-upload your bank statement as the current copy is older than 3 months.",
-  "isPrivate": false
+  "facultyId": "PASTE_FACULTY_OR_COUNSELOR_ID",
+  "sectionId": "PASTE_SECTION_ID",
+  "date": "2026-11-01",
+  "records": [
+    {
+      "studentId": "PASTE_STUDENT_ID",
+      "status": "PRESENT",
+      "remarks": "Attended on time"
+    }
+  ]
 }
 ```
+*(Statuses: `PRESENT`, `ABSENT`, `LATE`, `EXCUSED`)*
 
 ---
 
-#### 4.6 Verify Document Status (Counselor / Admin)
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/higher-study/documents/{documentId}/verify`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{counselorToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "status": "VERIFIED",
-  "adminFeedback": "Passport copy verified successfully!"
-}
-```
-
----
-
-#### 4.7 Update Application Stage Pipeline
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/higher-study/applications/{applicationId}/stage`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{counselorToken}}`
-- **Stages:** `DRAFT` | `DOCUMENTS_PENDING` | `UNDER_REVIEW` | `SUBMITTED_TO_UNIVERSITY` | `OFFER_ISSUED` | `VISA_PROCESSING` | `ENROLLED` | `REJECTED`
-- **Request Body (JSON):**
-```json
-{
-  "status": "SUBMITTED_TO_UNIVERSITY"
-}
-```
-
----
-
-#### 4.8 Issue & Upload Offer Letter (Counselor / Admin)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/applications/{applicationId}/issue-offer-letter`
-- **Headers:** `Authorization: Bearer {{counselorToken}}`
-- **Body:** `form-data` with key `file` (PDF/Image).
-
----
-
-#### 4.9 Toggle Offer Letter Lock / Unlock (Admin)
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/higher-study/applications/{applicationId}/toggle-offer-lock`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "isOfferUnlocked": true
-}
-```
-
----
-
-#### 4.10 Download Offer Letter (Student)
+#### 5.2 Get My Attendance Records
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/applications/{applicationId}/download-offer-letter`
+- **URL:** `{{baseUrl}}/attendance/my`
 - **Headers:** `Authorization: Bearer {{studentToken}}`
 
 ---
 
-### Module 5: Agency Commission & Payout Ledger (`/api/v1/commissions`)
-
-#### 5.1 Create Commission Entry (Super Admin Only)
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/commissions`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{superAdminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "studentId": "REPLACE_WITH_STUDENT_ID",
-  "referredByUserId": "REPLACE_WITH_COUNSELOR_USER_ID",
-  "universityName": "American University of Cyprus",
-  "grossAmount": 1000,
-  "currency": "EUR",
-  "vatPercentage": 10,
-  "exchangeRateToBDT": 135,
-  "notes": "Direct Fall 2026 admission commission"
-}
-```
-
----
-
-#### 5.2 Mark Payout Status (Super Admin Only)
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/commissions/{commissionId}/status`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{superAdminToken}}`
-- **Statuses:** `PENDING` | `APPROVED` | `WITHDRAWN` | `REJECTED`
-- **Request Body (JSON):**
-```json
-{
-  "status": "WITHDRAWN",
-  "notes": "Bank transfer completed to counselor account"
-}
-```
-
----
-
-#### 5.3 Assign Student Referral (Admin & Super Admin)
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/commissions/referral/{studentId}`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "referredByUserId": "REPLACE_WITH_COUNSELOR_OR_ADMIN_USER_ID"
-}
-```
-
----
-
-#### 5.4 Toggle Counselor Commission Visibility
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/commissions/counselor/{counselorId}/visibility`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "canViewCommission": true
-}
-```
-
----
-
-#### 5.5 Get My Referral Ledger (Counselor / Admin)
+#### 5.3 Get Section Attendance Summary
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/commissions/my-ledger`
-- **Headers:** `Authorization: Bearer {{counselorToken}}`
-
----
-
-#### 5.6 Get Master Financial Summary (Super Admin Only)
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/commissions/all-ledger?page=1&limit=10`
+- **URL:** `{{baseUrl}}/attendance/section/{sectionId}`
 - **Headers:** `Authorization: Bearer {{superAdminToken}}`
 
 ---
 
-### Module 6: Educational Blog & News Portal (`/api/v1/higher-study/blogs`)
+### Module 6: Academic Grading & GPA Transcripts (`/api/v1/grades`)
 
-#### 6.1 Create Blog Post (Admin)
+#### 6.1 Submit Course Grade
 - **Method:** `POST`
-- **URL:** `{{baseUrl}}/higher-study/blogs`
+- **URL:** `{{baseUrl}}/grades/submit`
 - **Headers:**
   - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
+  - `Authorization: Bearer {{superAdminToken}}` (or `{{counselorToken}}`)
+- **Grading Scale Automatically Calculated:**
+  - `80+` ➔ `A+ (4.00)`
+  - `75-79` ➔ `A (3.75)`
+  - `70-74` ➔ `A- (3.50)`
+  - `65-69` ➔ `B+ (3.25)`
+  - `60-64` ➔ `B (3.00)`
+  - `55-59` ➔ `B- (2.75)`
+  - `50-54` ➔ `C+ (2.50)`
+  - `45-49` ➔ `C (2.25)`
+  - `40-44` ➔ `D (2.00)`
+  - `<40` ➔ `F (0.00)`
+- **Request Body:**
 ```json
 {
-  "title": "Top 5 European Study Destinations with Low Tuition Fees in 2026",
-  "content": "Explore affordable higher education opportunities in Cyprus, Germany, Poland, and Hungary with visa guidance and scholarship criteria...",
-  "category": "Scholarship & Destination Guide",
-  "tags": ["Europe", "Scholarships", "Cyprus", "Visa"],
-  "bannerUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644"
+  "studentId": "PASTE_STUDENT_ID",
+  "sectionId": "PASTE_SECTION_ID",
+  "marks": 88,
+  "remarks": "Excellent performance in midterm and lab assignments"
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Grade submitted and published successfully!",
+  "data": {
+    "marks": 88,
+    "gradePoint": 4.0,
+    "letterGrade": "A+",
+    "isPublished": true
+  }
 }
 ```
 
 ---
 
-#### 6.2 Get All Published Blog Posts
+#### 6.2 Get My Academic Results & CGPA
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/blogs?page=1&limit=10`
-- **Headers:** *None (Public endpoint)*
+- **URL:** `{{baseUrl}}/grades/my-results`
+- **Headers:** `Authorization: Bearer {{studentToken}}`
+- **Response (200 OK):** Returns completed courses, credits earned, grade point per course, and cumulative GPA (CGPA).
 
 ---
 
-#### 6.3 Get Blog Post By Slug
+#### 6.3 Download Official Transcript PDF
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/higher-study/blogs/top-5-european-study-destinations-with-low-tuition-fees-in-2026`
-- **Headers:** *None (Public endpoint)*
+- **URL:** `{{baseUrl}}/grades/transcript-pdf`
+- **Headers:** `Authorization: Bearer {{studentToken}}`
+- **Description:** Dynamically streams an official, digitally stamped Academic Transcript PDF built with `pdfkit`.
 
 ---
 
-### Module 7: Multi-Role Support Chat & Room Lock (`/api/v1/chat`)
+### Module 7: Stripe Payment Gateway Integration (`/api/v1/payments`)
 
-#### 7.1 Send Chat Message
-- **Method:** `POST`
-- **URL:** `{{baseUrl}}/chat/send`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "studentUserId": "REPLACE_WITH_STUDENT_USER_ID",
-  "message": "Hello Arafat, our admissions committee has reviewed your application for Cyprus.",
-  "senderDisplayName": "Admissions Desk (Admin)"
-}
-```
-
----
-
-#### 7.2 Get Chat Room Messages
-- **Method:** `GET`
-- **URL:** `{{baseUrl}}/chat/room/messages/{roomId}`
-- **Headers:** `Authorization: Bearer {{adminToken}}`
-
----
-
-#### 7.3 Toggle Chat Exclusive Lock (1-on-1 Takeover Mode)
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/chat/room/{roomId}/lock`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{counselorToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "lock": true
-}
-```
-
----
-
-#### 7.4 Update Student Target Budget in Chat
-- **Method:** `PATCH`
-- **URL:** `{{baseUrl}}/chat/student/{studentUserId}/budget`
-- **Headers:**
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {{adminToken}}`
-- **Request Body (JSON):**
-```json
-{
-  "targetBudget": 8000,
-  "preferredCurrency": "USD",
-  "preferredCountry": "Cyprus"
-}
-```
-
----
-
-### Module 8: Stripe Payments, Invoices & Receipts (`/api/v1/payments`)
-
-#### 8.1 Create Stripe Checkout Session (Tuition / Deposit)
+#### 7.1 Create Stripe Checkout Session
 - **Method:** `POST`
 - **URL:** `{{baseUrl}}/payments/create-checkout-session`
 - **Headers:**
   - `Content-Type: application/json`
   - `Authorization: Bearer {{studentToken}}`
-- **Request Body (JSON):**
+- **Request Body:**
 ```json
 {
   "amount": 250,
@@ -753,68 +550,154 @@ When you log in with different roles, copy the `accessToken` from the response i
   "description": "Fall 2026 Semester Tuition - Rise Abroad Education"
 }
 ```
-- **Response:** Returns `checkoutUrl` (Stripe Checkout link) and `paymentId`.
-- **Stripe Testing Card Details:**
-  - **Card Number:** `4242 4242 4242 4242`
-  - **Expiry Date:** Any future date (e.g. `12/28`)
-  - **CVC:** `123`
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Checkout session created successfully!",
+  "data": {
+    "sessionId": "cs_test_a1b2c3...",
+    "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3...",
+    "paymentId": "0194b1f4-..."
+  }
+}
+```
+
+#### Test Card Credentials for Stripe:
+- **Card Number:** `4242 4242 4242 4242`
+- **Expiration:** Any future month/year (e.g., `12/28`)
+- **CVC:** `123`
+- **Postal Code:** `12345`
 
 ---
 
-#### 8.2 Download Official Payment Receipt PDF
+#### 7.2 Download Official Payment Receipt PDF
 - **Method:** `GET`
 - **URL:** `{{baseUrl}}/payments/receipt/{paymentId}`
 - **Headers:** `Authorization: Bearer {{studentToken}}`
-- **Description:** Generates and downloads an official electronically-verified PDF payment receipt with "Rise Abroad Education" header.
+- **Description:** Downloads an official electronically-verified PDF invoice receipt with company stamp and payment status.
 
 ---
 
-#### 8.3 Get My Payments & Invoices
+#### 7.3 Get My Payment History
 - **Method:** `GET`
-- **URL:** `{{baseUrl}}/payments/my-payments`
+- **URL:** `{{baseUrl}}/payments/my-history`
 - **Headers:** `Authorization: Bearer {{studentToken}}`
 
 ---
 
-## Live Deployment & Updating API URL
+### Module 8: Global Higher Study & Applications (`/api/v1/higher-study`)
 
-When you deploy this backend to a live server (e.g., **Vercel**, **Railway**, **Render**, or a VPS):
-
-1. **Set Production Environment Variables:**
-   - `DATABASE_URL` = Your production PostgreSQL pooled connection string
-   - `REDIS_URL` = Your Redis Cloud connection URL
-   - `JWT_ACCESS_SECRET` & `JWT_REFRESH_SECRET`
-   - `SMTP_USER` & `SMTP_PASS`
-   - `STRIPE_SECRET_KEY` & `STRIPE_WEBHOOK_SECRET`
-   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-2. **Update Postman `baseUrl`:**
-   - Change `baseUrl` variable to `https://rise-abroad-student-management.vercel.app/api/v1`
-3. **Update Frontend Environment Variable:**
-   - In `university-management-frontend/.env.local` or hosting provider settings:
-   ```env
-   NEXT_PUBLIC_API_URL=https://rise-abroad-student-management.vercel.app/api/v1
-   ```
+#### 8.1 Create Partner University
+- **Method:** `POST`
+- **URL:** `{{baseUrl}}/higher-study/universities`
+- **Headers:**
+  - `Content-Type: application/json`
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
+```json
+{
+  "name": "University of Central Lancashire (Cyprus)",
+  "countryId": "PASTE_COUNTRY_ID",
+  "city": "Pyla, Larnaca",
+  "ranking": 801,
+  "description": "Prestigious British campus in Cyprus with full international accreditation.",
+  "websiteUrl": "https://www.uclancyprus.ac.cy",
+  "paymentType": "UPFRONT_FEE",
+  "upfrontFeeAmount": 150
+}
+```
 
 ---
 
-## Local Development Commands
+#### 8.2 Student Applies for Program
+- **Method:** `POST`
+- **URL:** `{{baseUrl}}/higher-study/applications/apply`
+- **Headers:**
+  - `Content-Type: application/json`
+  - `Authorization: Bearer {{studentToken}}`
+- **Request Body:**
+```json
+{
+  "programId": "PASTE_PROGRAM_ID_HERE",
+  "intake": "Fall 2026",
+  "fundingSource": "Self Funded"
+}
+```
+
+---
+
+### Module 9: Admin Analytics & System Notifications (`/api/v1/admin`)
+
+#### 9.1 Get System Dashboard Statistics
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/admin/dashboard-stats`
+- **Headers:** `Authorization: Bearer {{superAdminToken}}`
+- **Response (200 OK):** Returns counts of total students, counselors, active courses, applications, and revenue summary.
+
+---
+
+#### 9.2 Broadcast System Notification
+- **Method:** `POST`
+- **URL:** `{{baseUrl}}/notifications/broadcast`
+- **Headers:**
+  - `Content-Type: application/json`
+  - `Authorization: Bearer {{superAdminToken}}`
+- **Request Body:**
+```json
+{
+  "title": "Semester Registration Open",
+  "message": "Fall 2026 semester registration is now officially open for all enrolled students.",
+  "priority": "INFO",
+  "audience": "ALL"
+}
+```
+
+---
+
+#### 9.3 Get My Notifications
+- **Method:** `GET`
+- **URL:** `{{baseUrl}}/notifications/my`
+- **Headers:** `Authorization: Bearer {{studentToken}}`
+
+---
+
+## 🛠️ Security, Performance & Architecture Highlights
+
+1. **Layered Modular Architecture:** Strict separation of concerns (`Route ➔ Controller ➔ Service ➔ Prisma ORM`).
+2. **Interactive Database Transactions:** Critical workflows (Course enrollment seats, Drop course, Stripe webhooks) execute inside `prisma.$transaction` to guarantee atomicity and avoid race conditions.
+3. **Role-Based Authorization (RBAC):** Middleware validates Bearer JWT tokens and immediately yields `403 Forbidden` for unauthorized roles.
+4. **Input Validation:** Every payload is validated against strict **Zod schemas** before reaching the controller.
+5. **Security Suite:** 
+   - HTTP Header hardening via **Helmet**.
+   - Configured **CORS** policies with credential allowance.
+   - Brute-force & DDoS protection via **express-rate-limit**.
+6. **Soft Deletes:** Records utilize `isDeleted: true` and `deletedAt` timestamps instead of destructive drops.
+7. **Audit Logging:** System administrative actions are captured through `activityLogger` into the database.
+
+---
+
+## 💻 Local Development & Build Commands
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Generate Prisma Client
-npx prisma generate
+# 2. Setup environment variables (.env)
+cp .env.example .env
 
-# Synchronize database schema
+# 3. Generate Prisma client
+npm run prisma:generate
+
+# 4. Synchronize database schema
 npx prisma db push
 
-# Start backend in development mode
+# 5. Start dev server with hot reload
 npm run dev
 
-# Build production bundle
+# 6. Build production bundle (Prisma + tsup)
 npm run build
 ```
 
 ---
-*Rise Abroad Education Management System.*
+*University Management System — Batch 7 Assignment 6.*
