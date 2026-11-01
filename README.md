@@ -10,7 +10,7 @@ An enterprise-grade, scalable, and secure RESTful backend API built with **Node.
 
 | Resource | URL / Location | Description |
 |---|---|---|
-| **🚀 Live Production API** | `https://rise-abroad-student-management.vercel.app/api/v1` | Hosted live on Vercel Serverless Functions |
+| **🚀 Live Production API** | `https://riseabroad-server.vercel.app/api/v1` | Hosted live on Vercel Serverless Functions |
 | **💻 Local API Base URL** | `http://localhost:5000/api/v1` | Local development server |
 | **📦 GitHub Repository** | [student-management-backend-A6](https://github.com/arafathussen/student-management-backend-A6) | Complete source code with 39+ meaningful commits |
 | **📑 Postman Collection (File)** | [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json) | 13 folders, 74 structured requests v2.1.0 |
@@ -41,7 +41,7 @@ The collection uses a dynamic collection variable `{{baseUrl}}`:
 1. Click on collection: **`Rise Abroad Education Management System`**.
 2. Go to the **Variables** tab.
 3. Edit `Current Value` of `baseUrl`:
-   - **For Live Production Testing (Recommended):** `https://rise-abroad-student-management.vercel.app/api/v1`
+   - **For Live Production Testing (Recommended):** `https://riseabroad-server.vercel.app/api/v1`
    - **For Local Testing:** `http://localhost:5000/api/v1`
 4. Press `Ctrl + S` to save.
 
