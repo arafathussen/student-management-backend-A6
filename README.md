@@ -1,34 +1,34 @@
-# 🎓 University Management Backend
+# University Management Backend
 
 A secure, scalable RESTful backend built with **TypeScript, Express 5, PostgreSQL, and Prisma ORM**. Features 3-tier RBAC, transaction-safe course enrollment, automated GPA calculation, PDF transcripts, and Stripe checkout payment integration.
 
 ---
 
-## 🌐 Quick Links & Resources
+## Quick Links & Resources
 
 | Resource | URL / Location | Description |
 |---|---|---|
-| **🚀 Live Production API** | `https://riseabroad-server.vercel.app/api/v1` | Hosted live on Vercel Serverless Functions |
-| **💻 Local API Base URL** | `http://localhost:5000/api/v1` | Local development server |
-| **📦 GitHub Repository** | [student-management-backend-A6](https://github.com/arafathussen/student-management-backend-A6) | Complete source code with 39+ meaningful commits |
-| **📑 Postman Collection (File)** | [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json) | 13 folders, 74 structured requests v2.1.0 |
-| **🔗 Postman Published Docs** | `https://documenter.getpostman.com/view/YOUR_VIEW_ID` | Interactive web documentation (Publish from Postman) |
+| **Live Production API** | `https://riseabroad-server.vercel.app/api/v1` | Hosted live on Vercel Serverless Functions |
+| **Local API Base URL** | `http://localhost:5000/api/v1` | Local development server |
+| **GitHub Repository** | [student-management-backend-A6](https://github.com/arafathussen/student-management-backend-A6) | Complete source code with 39+ meaningful commits |
+| **Postman Collection (File)** | [`University_Management_System.postman_collection.json`](./University_Management_System.postman_collection.json) | 13 folders, 74 structured requests v2.1.0 |
+| **Postman Published Docs** | `https://documenter.getpostman.com/view/YOUR_VIEW_ID` | Interactive web documentation (Publish from Postman) |
 
 ---
 
-## 👥 Pre-Configured Test Accounts (RBAC Roles)
+## Pre-Configured Test Accounts (RBAC Roles)
 
 Use these active accounts seeded directly in the PostgreSQL database for testing all role-based permissions and 403 Forbidden checks:
 
 | Role | Email | Password | Access Privileges & Capabilities |
 |---|---|---|---|
-| 👑 **Super Admin** | `admin@university.com` | `AdminPassword123!` | System-wide master control, user status & role management, department/semester/course setup, dashboard analytics |
-| 🧑‍🏫 **Senior Counselor / Admin** | `counselor@university.com` | `Counselor123!` | Academic desk, attendance recording, grade submission, student application management, document verification |
-| 🎓 **Student Applicant** | `arafat.student@gmail.com` | `Student123!` | Course enrollment, semester course registration, transcript PDF download, attendance records, Stripe fee payments |
+| **Super Admin** | `admin@university.com` | `AdminPassword123!` | System-wide master control, user status & role management, department/semester/course setup, dashboard analytics |
+| **Counselor** | `counselor@university.com` | `Counselor123!` | Academic desk, attendance recording, grade submission, student application management, document verification |
+| **Student** | `arafat.student@gmail.com` | `Student123!` | Course enrollment, semester course registration, transcript PDF download, attendance records, Stripe fee payments |
 
 ---
 
-## 🚀 Postman Setup & Instant Testing Guide
+## Postman Setup & Testing Guide
 
 ### Step 1: Import Collection
 1. Open **Postman**.
@@ -51,7 +51,7 @@ When you login using any account from **Module 1**, copy the `accessToken` and p
 
 ---
 
-## 📚 Complete Step-by-Step API Documentation & Request Payloads
+## API Documentation & Request Payloads
 
 ---
 
@@ -660,7 +660,7 @@ When you login using any account from **Module 1**, copy the `accessToken` and p
 
 ---
 
-## 🛠️ Security, Performance & Architecture Highlights
+## Security, Performance & Architecture Highlights
 
 1. **Layered Modular Architecture:** Strict separation of concerns (`Route ➔ Controller ➔ Service ➔ Prisma ORM`).
 2. **Interactive Database Transactions:** Critical workflows (Course enrollment seats, Drop course, Stripe webhooks) execute inside `prisma.$transaction` to guarantee atomicity and avoid race conditions.
@@ -675,7 +675,7 @@ When you login using any account from **Module 1**, copy the `accessToken` and p
 
 ---
 
-## 💻 Local Development & Build Commands
+## Local Development & Build Commands
 
 ```bash
 # 1. Install dependencies
